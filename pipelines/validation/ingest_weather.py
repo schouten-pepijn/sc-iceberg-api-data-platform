@@ -12,6 +12,16 @@ WEATHER_SCHEMA = pa.DataFrameSchema(
             checks=Check.in_range(min_value=-80, max_value=60),
             nullable=True,
         ),
+        "precipitation": pa.Column(
+            float,
+            checks=Check.ge(0),
+            nullable=True,
+        ),
+        "wind_speed_10m": pa.Column(
+            float,
+            checks=Check.ge(0),
+            nullable=True,
+        ),
         "_ingest_ts": pa.Column(pa.DateTime, nullable=False),
         "_source_api": pa.Column(str, nullable=False),
         "_batch_id": pa.Column(str, nullable=False),

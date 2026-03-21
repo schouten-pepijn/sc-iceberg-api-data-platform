@@ -1,22 +1,28 @@
 from pyiceberg.catalog import load_catalog
 from pyiceberg.schema import Schema
-from pyiceberg.types import DoubleType, StringType, TimestampType, DateType, NestedField
+from pyiceberg.types import (
+    DoubleType,
+    StringType,
+    DateType,
+    NestedField,
+    TimestamptzType,
+)
 
 catalog = load_catalog("local")
 
 namespace = "lakehouse"
 
 bronze_weather_schema = Schema(
-    NestedField(1, "timestamp", TimestampType(), required=True),
+    NestedField(1, "timestamp", TimestamptzType(), required=False),
     NestedField(2, "temperature", DoubleType(), required=False),
-    NestedField(3, "_ingest_ts", TimestampType(), required=True),
-    NestedField(4, "_source_api", StringType(), required=True),
-    NestedField(5, "_batch_id", StringType(), required=True),
+    NestedField(3, "_ingest_ts", TimestamptzType(), required=False),
+    NestedField(4, "_source_api", StringType(), required=False),
+    NestedField(5, "_batch_id", StringType(), required=False),
 )
 
 silver_weather_hourly_schema = Schema(
-    NestedField(1, "timestamp", TimestampType(), required=True),
-    NestedField(2, "day", DateType(), required=True),
+    NestedField(1, "timestamp", TimestamptzType(), required=False),
+    NestedField(2, "day", DateType(), required=False),
     NestedField(3, "temperature_c", DoubleType(), required=False),
     NestedField(4, "temperature_f", DoubleType(), required=False),
 )

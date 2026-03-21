@@ -4,6 +4,7 @@ from pyiceberg.types import (
     DoubleType,
     StringType,
     DateType,
+    LongType,
     NestedField,
     TimestamptzType,
 )
@@ -31,6 +32,15 @@ silver_weather_hourly_schema = Schema(
     NestedField(6, "wind_speed_10m_max", DoubleType(), required=False),
 )
 
+gold_fact_weather_schema = Schema(
+    NestedField(1, "day", DateType(), required=False),
+    NestedField(2, "avg_temperature_c", DoubleType(), required=False),
+    NestedField(3, "avg_temperature_f", DoubleType(), required=False),
+    NestedField(4, "total_precipitation_mm", DoubleType(), required=False),
+    NestedField(5, "max_wind_speed_10m", DoubleType(), required=False),
+    NestedField(6, "hour_count", LongType(), required=False),
+)
+
 
 def create_namespace_if_missing() -> None:
     existing_namespaces = set(catalog.list_namespaces())
@@ -52,6 +62,7 @@ def run() -> None:
     create_table_if_missing(
         "lakehouse.silver_weather_hourly", silver_weather_hourly_schema
     )
+    create_table_if_missing("lakehouse.fact_weather", gold_fact_weather_schema)
 
 
 if __name__ == "__main__":

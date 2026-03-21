@@ -3,7 +3,6 @@ import pandera.pandas as pa
 from pandera import Check
 from pandera.errors import SchemaErrors
 
-
 WEATHER_SCHEMA = pa.DataFrameSchema(
     {
         "timestamp": pa.Column(pa.DateTime, nullable=False),

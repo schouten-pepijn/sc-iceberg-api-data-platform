@@ -20,3 +20,6 @@ own_docs/
 
 # PyIceberg local catalog and warehouse
 .local/iceberg/
+
+# dagster logs
+.tmp_dagster_*/

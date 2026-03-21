@@ -1,6 +1,14 @@
 version: "3"
 
 tasks:
+  run-dev-dagster:
+    desc: Run the Dagster pipeline in development mode with the Dagit UI
+    cmds:
+      - uv run dagster dev -m orchestration.definitions
+  run-pipeline:
+    desc: Run the Dagster pipeline
+    cmds:
+      - uv run dagster job execute --job-name=weather_pipeline
   reset-catalog:
     desc: Remove the local Iceberg catalog database and warehouse files
     cmds:

@@ -18,17 +18,17 @@ def to_arrow_table(df):
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
 
 
-def append_to_silver_weather(arrow_table) -> None:
+def full_load_silver_weather(arrow_table) -> None:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.silver_weather_hourly")
-    table.append(arrow_table)
+    table.overwrite(arrow_table)
 
 
 def run() -> None:
     df = transform_weather()
     arrow_table = to_arrow_table(df)
-    append_to_silver_weather(arrow_table)
-    print(f"Appended {len(df)} records to lakehouse.silver_weather_hourly")
+    full_load_silver_weather(arrow_table)
+    print(f"Overwrote {len(df)} records in lakehouse.silver_weather_hourly")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
 
-from pipelines.transformations.transform_fact_weather import run as transform_fact_weather
+from pipelines.transformations.transform_fact_weather import (
+    run as transform_fact_weather,
+)
 
 
 def to_arrow_table(df):
@@ -18,17 +20,17 @@ def to_arrow_table(df):
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
 
 
-def append_to_fact_weather(arrow_table) -> None:
+def full_load_fact_weather(arrow_table) -> None:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
-    table.append(arrow_table)
+    table.overwrite(arrow_table)
 
 
 def run() -> None:
     df = transform_fact_weather()
     arrow_table = to_arrow_table(df)
-    append_to_fact_weather(arrow_table)
-    print(f"Appended {len(df)} records to lakehouse.fact_weather")
+    full_load_fact_weather(arrow_table)
+    print(f"Overwrote {len(df)} records in lakehouse.fact_weather")
 
 
 if __name__ == "__main__":

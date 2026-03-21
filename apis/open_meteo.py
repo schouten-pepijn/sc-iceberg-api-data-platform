@@ -10,7 +10,7 @@ def fetch_weather_data(
     params = {
         "latitude": lat,
         "longitude": lon,
-        "hourly": "temperature_2m",
+        "minutely_15": "temperature_2m,precipitation,wind_speed_10m",
     }
 
     r = httpx.get(BASE_URL, params=params)

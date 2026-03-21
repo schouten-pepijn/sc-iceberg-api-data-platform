@@ -17,3 +17,6 @@ own_docs/
 
 # VSCode settings
 .vscode/
+
+# PyIceberg local catalog and warehouse
+.local/iceberg/

@@ -1,0 +1,7 @@
+catalog:
+  local:
+    type: sql
+    uri: sqlite:///C:/Users/71861/Own/Projects/data_engineering/showcase/sc-iceberg-api-data-platform/.local/iceberg/catalog.db
+    warehouse: file:///C:/Users/71861/Own/Projects/data_engineering/showcase/sc-iceberg-api-data-platform/.local/iceberg/warehouse
+    py-io-impl: pyiceberg.io.fsspec.FsspecFileIO
+    init_catalog_tables: true

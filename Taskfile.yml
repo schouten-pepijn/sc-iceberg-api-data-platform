@@ -1,15 +1,29 @@
-version: '3'
+version: "3"
 
 tasks:
+  reset-catalog:
+    desc: Remove the local Iceberg catalog database and warehouse files
+    cmds:
+      - 'powershell.exe -NoProfile -Command "Remove-Item ''.local\\iceberg\\pyiceberg_catalog.db'' -Force -ErrorAction SilentlyContinue"'
+      - 'powershell.exe -NoProfile -Command "Remove-Item ''.local\\iceberg\\warehouse'' -Recurse -Force -ErrorAction SilentlyContinue"'
+      - 'powershell.exe -NoProfile -Command "New-Item ''.local\\iceberg\\warehouse'' -ItemType Directory -Force | Out-Null"'
+
+  create-tables:
+    desc: Create the Iceberg namespace and local Bronze and Silver tables
+    cmds:
+      - uv run python catalog/create_tables.py
+
   bump-patch:
+    desc: Bump the patch version
     cmds:
-      - bump2version patch
-    desc: Bump patch version
+      - uv run bump-my-version bump patch
+
   bump-minor:
+    desc: Bump the minor version
     cmds:
-      - bump2version minor
-    desc: Bump minor version
+      - uv run bump-my-version bump minor
+
   bump-major:
+    desc: Bump the major version
     cmds:
-      - bump2version major
-    desc: Bump major version
+      - uv run bump-my-version bump major

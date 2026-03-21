@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dagster>=1.12.20",
     "httpx>=0.28.1",
     "pandas>=3.0.1",
     "pandera>=0.30.1",

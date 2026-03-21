@@ -11,6 +11,8 @@ def to_arrow_table(df):
             pa.field("day", pa.date32(), nullable=True),
             pa.field("temperature_c", pa.float64(), nullable=True),
             pa.field("temperature_f", pa.float64(), nullable=True),
+            pa.field("precipitation_mm", pa.float64(), nullable=True),
+            pa.field("wind_speed_10m_max", pa.float64(), nullable=True),
         ]
     )
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)

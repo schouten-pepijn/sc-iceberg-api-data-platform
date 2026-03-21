@@ -18,17 +18,38 @@ def run() -> pd.DataFrame:
         raise ValueError(f"Validation failed: {validation_result['errors']}")
 
     df = validation_result["validated_df"].copy()
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+    df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
 
-    silver_df = df[["timestamp", "temperature"]].copy()
-    silver_df = silver_df.drop_duplicates(subset=["timestamp"])
-    silver_df = silver_df.rename(columns={"temperature": "temperature_c"})
+    latest_bronze_df = (
+        df.sort_values(["timestamp", "_ingest_ts"])
+        .drop_duplicates(subset=["timestamp"], keep="last")
+        .copy()
+    )
 
-    silver_df["timestamp"] = pd.to_datetime(silver_df["timestamp"], utc=True)
+    silver_df = (
+        latest_bronze_df.assign(hour_bucket=latest_bronze_df["timestamp"].dt.floor("h"))
+        .groupby("hour_bucket", as_index=False)
+        .agg(
+            temperature_c=("temperature", "mean"),
+            precipitation_mm=("precipitation", "sum"),
+            wind_speed_10m_max=("wind_speed_10m", "max"),
+        )
+        .rename(columns={"hour_bucket": "timestamp"})
+    )
+
     silver_df["day"] = silver_df["timestamp"].dt.date
     silver_df["temperature_f"] = silver_df["temperature_c"] * 9 / 5 + 32
 
     silver_df = silver_df[
-        ["timestamp", "day", "temperature_c", "temperature_f"]
+        [
+            "timestamp",
+            "day",
+            "temperature_c",
+            "temperature_f",
+            "precipitation_mm",
+            "wind_speed_10m_max",
+        ]
     ].sort_values("timestamp")
 
     return silver_df

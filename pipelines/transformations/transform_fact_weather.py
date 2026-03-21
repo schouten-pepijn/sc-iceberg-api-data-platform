@@ -13,7 +13,7 @@ def run() -> pd.DataFrame:
     silver_df["day"] = pd.to_datetime(silver_df["day"]).dt.date
 
     fact_weather_df = (
-        silver_df.groupby("day", as_index=False)
+        silver_df.groupby(["location_id", "day"], as_index=False)
         .agg(
             avg_temperature_c=("temperature_c", "mean"),
             avg_temperature_f=("temperature_f", "mean"),
@@ -21,7 +21,7 @@ def run() -> pd.DataFrame:
             max_wind_speed_10m=("wind_speed_10m_max", "max"),
             hour_count=("timestamp", "count"),
         )
-        .sort_values("day")
+        .sort_values(["location_id", "day"])
     )
 
     return fact_weather_df

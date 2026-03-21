@@ -7,6 +7,7 @@ from pipelines.transformations.transform_weather import run as transform_weather
 def to_arrow_table(df):
     schema = pa.schema(
         [
+            pa.field("location_id", pa.string(), nullable=True),
             pa.field("timestamp", pa.timestamp("us", tz="UTC"), nullable=True),
             pa.field("day", pa.date32(), nullable=True),
             pa.field("temperature_c", pa.float64(), nullable=True),

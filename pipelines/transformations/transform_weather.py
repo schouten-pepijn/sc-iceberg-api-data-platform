@@ -22,14 +22,14 @@ def run() -> pd.DataFrame:
     df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
 
     latest_bronze_df = (
-        df.sort_values(["timestamp", "_ingest_ts"])
-        .drop_duplicates(subset=["timestamp"], keep="last")
+        df.sort_values(["location_id", "timestamp", "_ingest_ts"])
+        .drop_duplicates(subset=["location_id", "timestamp"], keep="last")
         .copy()
     )
 
     silver_df = (
         latest_bronze_df.assign(hour_bucket=latest_bronze_df["timestamp"].dt.floor("h"))
-        .groupby("hour_bucket", as_index=False)
+        .groupby(["location_id", "hour_bucket"], as_index=False)
         .agg(
             temperature_c=("temperature", "mean"),
             precipitation_mm=("precipitation", "sum"),
@@ -43,6 +43,7 @@ def run() -> pd.DataFrame:
 
     silver_df = silver_df[
         [
+            "location_id",
             "timestamp",
             "day",
             "temperature_c",
@@ -50,7 +51,7 @@ def run() -> pd.DataFrame:
             "precipitation_mm",
             "wind_speed_10m_max",
         ]
-    ].sort_values("timestamp")
+    ].sort_values(["location_id", "timestamp"])
 
     return silver_df
 

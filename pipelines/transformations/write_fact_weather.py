@@ -9,6 +9,7 @@ from pipelines.transformations.transform_fact_weather import (
 def to_arrow_table(df):
     schema = pa.schema(
         [
+            pa.field("location_id", pa.string(), nullable=True),
             pa.field("day", pa.date32(), nullable=True),
             pa.field("avg_temperature_c", pa.float64(), nullable=True),
             pa.field("avg_temperature_f", pa.float64(), nullable=True),

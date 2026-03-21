@@ -1,6 +1,10 @@
 version: "3"
 
 tasks:
+  run-uvicorn-dev:
+    desc: Run the FastAPI application
+    cmds:
+      - uv run uvicorn services.api.main:app --reload
   run-dev-dagster:
     desc: Run the Dagster pipeline in development mode with the Dagit UI
     cmds:

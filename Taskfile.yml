@@ -1,18 +1,16 @@
 version: "3"
 
 tasks:
-  run-uvicorn-dev:
-    desc: Run the FastAPI application
+  run-api:
+    desc: Run the FastAPI application in development mode
     cmds:
       - uv run uvicorn services.api.main:app --reload
-  run-dev-dagster:
-    desc: Run the Dagster pipeline in development mode with the Dagit UI
+
+  run-dagster:
+    desc: Run Dagster in development mode
     cmds:
       - uv run dagster dev -m orchestration.definitions
-  run-pipeline:
-    desc: Run the Dagster pipeline
-    cmds:
-      - uv run dagster job execute --job-name=weather_pipeline
+
   reset-catalog:
     desc: Remove the local Iceberg catalog database and warehouse files
     cmds:
@@ -21,9 +19,39 @@ tasks:
       - 'powershell.exe -NoProfile -Command "New-Item ''.local\\iceberg\\warehouse'' -ItemType Directory -Force | Out-Null"'
 
   create-tables:
-    desc: Create the Iceberg namespace and local Bronze and Silver tables
+    desc: Create the Iceberg namespace and local lakehouse tables
     cmds:
       - uv run python catalog/create_tables.py
+
+  write-locations:
+    desc: Ingest the default location dimension data
+    cmds:
+      - uv run python pipelines/ingestion/write_locations.py
+
+  write-bronze-weather:
+    desc: Ingest weather data for the default location into Bronze
+    cmds:
+      - uv run python pipelines/ingestion/write_bronze_weather.py
+
+  write-silver-weather:
+    desc: Rebuild the Silver hourly weather table
+    cmds:
+      - uv run python pipelines/transformations/write_silver_weather.py
+
+  write-fact-weather:
+    desc: Rebuild the Gold daily weather fact table
+    cmds:
+      - uv run python pipelines/transformations/write_fact_weather.py
+
+  bootstrap-local:
+    desc: Reset local state and rebuild the full location-aware pipeline
+    cmds:
+      - task: reset-catalog
+      - task: create-tables
+      - task: write-locations
+      - task: write-bronze-weather
+      - task: write-silver-weather
+      - task: write-fact-weather
 
   bump-patch:
     desc: Bump the patch version

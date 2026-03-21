@@ -8,17 +8,17 @@ def to_arrow_table(df):
     return pa.Table.from_pandas(df, preserve_index=False)
 
 
-def full_load_bronze_weather(arrow_table) -> None:
+def append_to_bronze_weather(arrow_table) -> None:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.bronze_weather")
-    table.overwrite(arrow_table)
+    table.append(arrow_table)
 
 
-def run() -> None:
-    df = ingest_weather()
+def run(location_name: str = "Amsterdam") -> None:
+    df = ingest_weather(location_name=location_name)
     arrow_table = to_arrow_table(df)
-    full_load_bronze_weather(arrow_table)
-    print(f"Overwrote {len(df)} records in lakehouse.bronze_weather")
+    append_to_bronze_weather(arrow_table)
+    print(f"Appended {len(df)} records to lakehouse.bronze_weather")
 
 
 if __name__ == "__main__":

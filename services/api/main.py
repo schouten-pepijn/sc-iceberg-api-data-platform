@@ -8,7 +8,9 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import NoSuchTableError
 
 from services.api.models import DailyWeatherResponse
+from services.api.models import LocationResponse
 from services.api.serializers import serialize_daily_weather
+from services.api.serializers import serialize_locations
 
 app = FastAPI(title="Iceberg API Data Platform")
 
@@ -16,6 +18,12 @@ app = FastAPI(title="Iceberg API Data Platform")
 def load_fact_weather():
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
+    return table.scan().to_pandas()
+
+
+def load_dim_location():
+    catalog = load_catalog("local")
+    table = catalog.load_table("lakehouse.dim_location")
     return table.scan().to_pandas()
 
 
@@ -27,6 +35,33 @@ def read_root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/locations", response_model=list[LocationResponse])
+def get_locations(limit: int = Query(default=100, ge=1, le=1000)):
+    try:
+        df = load_dim_location().copy()
+    except NoSuchTableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="dim_location table does not exist. Materialize the location dimension first.",
+        ) from exc
+
+    if df.empty:
+        return []
+
+    df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
+    latest_locations = (
+        df.sort_values(["location_id", "_ingest_ts"])
+        .drop_duplicates(subset=["location_id"], keep="last")
+        .sort_values(["country_code", "name"])
+        .head(limit)
+    )
+
+    if latest_locations.empty:
+        return []
+
+    return serialize_locations(latest_locations)
 
 
 @app.get("/weather/daily", response_model=list[DailyWeatherResponse])

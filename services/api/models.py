@@ -22,3 +22,14 @@ class DailyWeatherResponse(BaseModel):
     hour_count: int | None = Field(
         default=None, description="Number of hourly records contributing to the day"
     )
+
+
+class LocationResponse(BaseModel):
+    location_id: str = Field(description="Identifier for the location")
+    name: str | None = Field(default=None, description="Location name")
+    country_code: str | None = Field(default=None, description="ISO country code")
+    country: str | None = Field(default=None, description="Country name")
+    admin1: str | None = Field(
+        default=None, description="First-level administrative area"
+    )
+    timezone: str | None = Field(default=None, description="IANA timezone name")

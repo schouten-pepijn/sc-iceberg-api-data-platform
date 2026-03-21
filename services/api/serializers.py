@@ -3,6 +3,7 @@ from typing import Any, Callable
 import pandas as pd
 
 from services.api.models import DailyWeatherResponse
+from services.api.models import LocationResponse
 
 
 def serialize_daily_weather(df: pd.DataFrame) -> list[DailyWeatherResponse]:
@@ -23,6 +24,23 @@ def serialize_daily_weather(df: pd.DataFrame) -> list[DailyWeatherResponse]:
             total_precipitation_mm=optional_float(row["total_precipitation_mm"]),
             max_wind_speed_10m=optional_float(row["max_wind_speed_10m"]),
             hour_count=optional_int(row["hour_count"]),
+        )
+        for row in normalized_df.to_dict(orient="records")
+    ]
+
+
+def serialize_locations(df: pd.DataFrame) -> list[LocationResponse]:
+    normalized_df = df.copy()
+    normalized_df = normalized_df.where(normalized_df.notna(), None)
+
+    return [
+        LocationResponse(
+            location_id=row["location_id"],
+            name=row["name"],
+            country_code=row["country_code"],
+            country=row["country"],
+            admin1=row["admin1"],
+            timezone=row["timezone"],
         )
         for row in normalized_df.to_dict(orient="records")
     ]

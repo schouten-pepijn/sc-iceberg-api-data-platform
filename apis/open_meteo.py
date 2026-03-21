@@ -3,7 +3,7 @@ import httpx
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
 
-def fetch_weather(
+def fetch_weather_data(
     lat=52.37,
     lon=4.90,
 ):
@@ -20,5 +20,5 @@ def fetch_weather(
 
 
 if __name__ == "__main__":
-    weather = fetch_weather()
+    weather = fetch_weather_data()
     print(weather)

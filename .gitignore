@@ -9,5 +9,11 @@ wheels/
 # Virtual environments
 .venv
 
+# environment variables
+.env
+
 # local files
 own_docs/
+
+# VSCode settings
+.vscode/

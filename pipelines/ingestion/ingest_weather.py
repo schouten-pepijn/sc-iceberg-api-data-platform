@@ -1,11 +1,32 @@
 import uuid
 
 import pandas as pd
+from pyiceberg.catalog import load_catalog
+
 from apis.open_meteo_weather import fetch_weather_data
 
 
-def run():
-    data = fetch_weather_data()
+def _load_location(location_name: str = "Amsterdam") -> dict:
+    catalog = load_catalog("local")
+    table = catalog.load_table("lakehouse.dim_location")
+    df = table.scan().to_pandas()
+
+    match = df[df["name"] == location_name].sort_values("_ingest_ts").tail(1)
+    if match.empty:
+        raise ValueError(f"No location found with name '{location_name}'")
+
+    row = match.iloc[0]
+    return {
+        "location_id": row["location_id"],
+        "name": row["name"],
+        "latitude": row["latitude"],
+        "longitude": row["longitude"],
+    }
+
+
+def run(location_name: str = "Amsterdam") -> pd.DataFrame:
+    location = _load_location(location_name=location_name)
+    data = fetch_weather_data(lat=location["latitude"], lon=location["longitude"])
 
     batch_id = str(uuid.uuid4())
     ingest_ts = pd.Timestamp.utcnow()
@@ -19,7 +40,7 @@ def run():
         }
     )
 
-    # metadata columns
+    df["location_id"] = location["location_id"]
     df["_ingest_ts"] = ingest_ts
     df["_source_api"] = "open_meteo"
     df["_batch_id"] = batch_id

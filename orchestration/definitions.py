@@ -1,17 +1,17 @@
 from dagster import Definitions
 
 from orchestration.assets.weather import (
-    dim_location,
-    bronze_weather,
-    fact_weather,
-    silver_weather_hourly,
+    dim_location_by_location,
+    bronze_weather_by_location,
+    fact_weather_by_location,
+    silver_weather_hourly_by_location,
 )
 
 defs = Definitions(
     assets=[
-        dim_location,
-        bronze_weather,
-        silver_weather_hourly,
-        fact_weather,
+        dim_location_by_location,
+        bronze_weather_by_location,
+        silver_weather_hourly_by_location,
+        fact_weather_by_location,
     ]
 )

@@ -11,9 +11,6 @@ def bronze_weather(context: dg.AssetExecutionContext) -> None:
 
 
 @dg.asset(deps=[bronze_weather])
-def silver_weather(context: dg.AssetExecutionContext) -> None:
+def silver_weather_hourly(context: dg.AssetExecutionContext) -> None:
     context.log.info("Transforming weather data into silver layer...")
     write_silver_weather()
-
-
-import dagster as dg

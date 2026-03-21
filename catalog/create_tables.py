@@ -15,9 +15,11 @@ namespace = "lakehouse"
 bronze_weather_schema = Schema(
     NestedField(1, "timestamp", TimestamptzType(), required=False),
     NestedField(2, "temperature", DoubleType(), required=False),
-    NestedField(3, "_ingest_ts", TimestamptzType(), required=False),
-    NestedField(4, "_source_api", StringType(), required=False),
-    NestedField(5, "_batch_id", StringType(), required=False),
+    NestedField(3, "precipitation", DoubleType(), required=False),
+    NestedField(4, "wind_speed_10m", DoubleType(), required=False),
+    NestedField(5, "_ingest_ts", TimestamptzType(), required=False),
+    NestedField(6, "_source_api", StringType(), required=False),
+    NestedField(7, "_batch_id", StringType(), required=False),
 )
 
 silver_weather_hourly_schema = Schema(
@@ -25,21 +27,19 @@ silver_weather_hourly_schema = Schema(
     NestedField(2, "day", DateType(), required=False),
     NestedField(3, "temperature_c", DoubleType(), required=False),
     NestedField(4, "temperature_f", DoubleType(), required=False),
+    NestedField(5, "precipitation_mm", DoubleType(), required=False),
+    NestedField(6, "wind_speed_10m_max", DoubleType(), required=False),
 )
 
 
 def create_namespace_if_missing() -> None:
     existing_namespaces = set(catalog.list_namespaces())
-    print(existing_namespaces)
-
     if (namespace,) not in existing_namespaces:
         catalog.create_namespace(namespace)
 
 
 def create_table_if_missing(identifier: str, schema: Schema) -> None:
     existing_tables = set(catalog.list_tables(namespace))
-    print(existing_tables)
-
     table_name = identifier.split(".")[-1]
     if (namespace, table_name) not in existing_tables:
 

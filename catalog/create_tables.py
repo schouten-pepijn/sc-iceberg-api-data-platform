@@ -21,6 +21,7 @@ bronze_weather_schema = Schema(
     NestedField(5, "_ingest_ts", TimestamptzType(), required=False),
     NestedField(6, "_source_api", StringType(), required=False),
     NestedField(7, "_batch_id", StringType(), required=False),
+    NestedField(8, "location_id", StringType(), required=False),
 )
 
 silver_weather_hourly_schema = Schema(
@@ -30,6 +31,7 @@ silver_weather_hourly_schema = Schema(
     NestedField(4, "temperature_f", DoubleType(), required=False),
     NestedField(5, "precipitation_mm", DoubleType(), required=False),
     NestedField(6, "wind_speed_10m_max", DoubleType(), required=False),
+    NestedField(7, "location_id", StringType(), required=False),
 )
 
 gold_fact_weather_schema = Schema(
@@ -39,6 +41,22 @@ gold_fact_weather_schema = Schema(
     NestedField(4, "total_precipitation_mm", DoubleType(), required=False),
     NestedField(5, "max_wind_speed_10m", DoubleType(), required=False),
     NestedField(6, "hour_count", LongType(), required=False),
+    NestedField(7, "location_id", StringType(), required=False),
+)
+
+dim_location_schema = Schema(
+    NestedField(1, "location_id", StringType(), required=False),
+    NestedField(2, "name", StringType(), required=False),
+    NestedField(3, "latitude", DoubleType(), required=False),
+    NestedField(4, "longitude", DoubleType(), required=False),
+    NestedField(5, "elevation", DoubleType(), required=False),
+    NestedField(6, "timezone", StringType(), required=False),
+    NestedField(7, "country_code", StringType(), required=False),
+    NestedField(8, "country", StringType(), required=False),
+    NestedField(9, "admin1", StringType(), required=False),
+    NestedField(10, "_ingest_ts", TimestamptzType(), required=False),
+    NestedField(11, "_source_api", StringType(), required=False),
+    NestedField(12, "_batch_id", StringType(), required=False),
 )
 
 
@@ -58,6 +76,9 @@ def create_table_if_missing(identifier: str, schema: Schema) -> None:
 
 def run() -> None:
     create_namespace_if_missing()
+
+    create_table_if_missing("lakehouse.dim_location", dim_location_schema)
+
     create_table_if_missing("lakehouse.bronze_weather", bronze_weather_schema)
     create_table_if_missing(
         "lakehouse.silver_weather_hourly", silver_weather_hourly_schema

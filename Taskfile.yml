@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  bump-patch:
+    cmds:
+      - bump2version patch
+    desc: Bump patch version
+  bump-minor:
+    cmds:
+      - bump2version minor
+    desc: Bump minor version
+  bump-major:
+    cmds:
+      - bump2version major
+    desc: Bump major version

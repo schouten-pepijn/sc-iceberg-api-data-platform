@@ -16,6 +16,7 @@ def serialize_daily_weather(df: pd.DataFrame) -> list[DailyWeatherResponse]:
 
     return [
         DailyWeatherResponse(
+            location_id=row["location_id"],
             day=row["day"],
             avg_temperature_c=optional_float(row["avg_temperature_c"]),
             avg_temperature_f=optional_float(row["avg_temperature_f"]),

@@ -3,6 +3,9 @@ from pydantic import BaseModel, Field
 
 
 class DailyWeatherResponse(BaseModel):
+    location_id: str = Field(
+        description="Identifier for the location of the weather data"
+    )
     day: date = Field(description="Calendar day for the weather aggregate")
     avg_temperature_c: float | None = Field(
         default=None, description="Average hourly temperature in Celsius"

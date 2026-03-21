@@ -22,6 +22,7 @@ WEATHER_SCHEMA = pa.DataFrameSchema(
             checks=Check.ge(0),
             nullable=True,
         ),
+        "location_id": pa.Column(str, nullable=False),
         "_ingest_ts": pa.Column(pa.DateTime, nullable=False),
         "_source_api": pa.Column(str, nullable=False),
         "_batch_id": pa.Column(str, nullable=False),

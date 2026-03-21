@@ -34,6 +34,7 @@ def get_daily_weather(
     limit: int = Query(default=100, ge=1, le=1000),
     start_date: date | None = None,
     end_date: date | None = None,
+    location_id: str | None = None,
 ):
     if start_date is not None and end_date is not None and start_date > end_date:
         raise HTTPException(
@@ -60,7 +61,10 @@ def get_daily_weather(
     if end_date is not None:
         df = df[df["day"] <= end_date]
 
-    df = df.sort_values("day").head(limit)
+    if location_id is not None:
+        df = df[df["location_id"] == location_id]
+
+    df = df.sort_values(["location_id", "day"]).head(limit)
 
     if df.empty:
         return []

@@ -1,7 +1,7 @@
 import uuid
 
 import pandas as pd
-from apis.open_meteo import fetch_weather_data
+from apis.open_meteo_weather import fetch_weather_data
 
 
 def run():

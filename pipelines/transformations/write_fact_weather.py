@@ -54,10 +54,27 @@ def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> 
 
 def run(location_name: str = "Amsterdam") -> None:
     location = _load_location(location_name=location_name)
-    df = transform_fact_weather(location_name=location_name)
+    df, max_processed_day = transform_fact_weather(location_name=location_name)
+
+    # A missing day watermark means there was no new Silver data to roll up.
+    if df.empty or max_processed_day is None:
+        print(
+            f"No new Silver data for {location_name}; skipped lakehouse.fact_weather refresh"
+        )
+        return
+
     arrow_table = to_arrow_table(df)
     overwrite_location_fact_weather(arrow_table, location["location_id"])
     print(f"Overwrote {len(df)} records in lakehouse.fact_weather for {location_name}")
+    # Persist the latest processed Silver day for the next incremental Gold run.
+    write_pipeline_state(
+        pipeline_name="fact_weather",
+        location_id=location["location_id"],
+        last_silver_processed_day=max_processed_day,
+    )
+    print(
+        f"Updated pipeline state for location_id {location['location_id']} with last_silver_processed_day {max_processed_day}"
+    )
 
 
 if __name__ == "__main__":

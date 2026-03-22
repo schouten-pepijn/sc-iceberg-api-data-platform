@@ -86,3 +86,41 @@ def test_daily_weather_filters_by_location(monkeypatch, api_client) -> None:
     body = response.json()
     assert len(body) == 1
     assert body[0]["location_id"] == "loc-b"
+
+
+def test_forecast_accuracy_filters_by_location(monkeypatch, api_client) -> None:
+    from services.api import main
+
+    monkeypatch.setattr(
+        main,
+        "load_fact_forecast_accuracy",
+        lambda: pd.DataFrame(
+            {
+                "location_id": ["loc-a", "loc-b"],
+                "target_timestamp": pd.to_datetime(
+                    ["2026-03-22T10:00:00Z", "2026-03-22T10:00:00Z"], utc=True
+                ),
+                "day": pd.to_datetime(["2026-03-22", "2026-03-22"]),
+                "forecast_generated_at": pd.to_datetime(
+                    ["2026-03-22T08:00:00Z", "2026-03-22T08:00:00Z"], utc=True
+                ),
+                "forecast_temperature": [10.0, 20.0],
+                "observed_temperature": [9.0, 21.0],
+                "temperature_error": [1.0, -1.0],
+                "forecast_precipitation": [0.5, 0.2],
+                "observed_precipitation": [0.0, 0.4],
+                "precipitation_error": [0.5, -0.2],
+                "forecast_wind_speed_10m": [5.0, 6.0],
+                "observed_wind_speed_10m": [4.0, 7.0],
+                "wind_speed_error": [1.0, -1.0],
+            }
+        ),
+    )
+
+    response = api_client.get("/forecast/accuracy", params={"location_id": "loc-b"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["location_id"] == "loc-b"
+    assert body[0]["target_timestamp"] == "2026-03-22T10:00:00Z"

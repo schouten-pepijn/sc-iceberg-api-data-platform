@@ -7,6 +7,10 @@ from catalog.pipeline_state import load_pipeline_state, write_pipeline_state
 from pipelines.transformations.transform_weather import run as transform_weather
 
 
+def _format_metadata_value(value: object) -> str | None:
+    return None if value is None else str(value)
+
+
 def to_arrow_table(df: object) -> pa.Table:
     schema = pa.schema(
         [
@@ -50,7 +54,7 @@ def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -
     )
 
 
-def run(location_name: str = "Amsterdam") -> None:
+def run(location_name: str = "Amsterdam") -> dict[str, object]:
     location = _load_location(location_name=location_name)
     previous_state = load_pipeline_state(
         pipeline_name="silver_weather_hourly",
@@ -64,6 +68,14 @@ def run(location_name: str = "Amsterdam") -> None:
 
     # A missing watermark advance means there was no new Bronze batch to process.
     if df.empty or max_ingest_ts is None:
+        result = {
+            "location_name": location_name,
+            "location_id": location["location_id"],
+            "previous_watermark": _format_metadata_value(previous_watermark),
+            "new_watermark": None,
+            "rows_written": 0,
+            "status": "no_op",
+        }
         print(
             "Silver refresh skipped: "
             f"location_name={location_name}, "
@@ -73,10 +85,18 @@ def run(location_name: str = "Amsterdam") -> None:
             "rows_written=0, "
             "status=no_op"
         )
-        return
+        return result
 
     arrow_table = to_arrow_table(df)
     overwrite_location_silver_weather(arrow_table, location["location_id"])
+    result = {
+        "location_name": location_name,
+        "location_id": location["location_id"],
+        "previous_watermark": _format_metadata_value(previous_watermark),
+        "new_watermark": _format_metadata_value(max_ingest_ts),
+        "rows_written": len(df),
+        "status": "written",
+    }
     print(
         "Silver refresh completed: "
         f"location_name={location_name}, "
@@ -93,6 +113,7 @@ def run(location_name: str = "Amsterdam") -> None:
         location_id=location["location_id"],
         last_bronze_ingest_ts=max_ingest_ts,
     )
+    return result
 
 
 if __name__ == "__main__":

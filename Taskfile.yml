@@ -21,7 +21,7 @@ tasks:
   reset-catalog:
     desc: Remove the local Iceberg catalog database and warehouse files
     cmds:
-      - 'powershell.exe -NoProfile -Command "if (Test-Path ''.local\\iceberg\\pyiceberg_catalog.db'') { Remove-Item ''.local\\iceberg\\pyiceberg_catalog.db'' -Force }"'
+      - 'powershell.exe -NoProfile -Command "if (Test-Path ''.local\\iceberg\\catalog.db'') { Remove-Item ''.local\\iceberg\\catalog.db'' -Force }"'
       - 'powershell.exe -NoProfile -Command "if (Test-Path ''.local\\iceberg\\warehouse'') { Remove-Item ''.local\\iceberg\\warehouse'' -Recurse -Force }"'
       - 'powershell.exe -NoProfile -Command "New-Item ''.local\\iceberg\\warehouse'' -ItemType Directory -Force | Out-Null"'
 

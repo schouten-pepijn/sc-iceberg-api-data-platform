@@ -12,6 +12,7 @@ dependencies = [
     "pandas>=3.0.1",
     "pandera>=0.30.1",
     "pyiceberg[pyarrow,sql-sqlite]>=0.11.1",
+    "pytest>=9.0.2",
 ]
 
 [dependency-groups]
@@ -19,7 +20,6 @@ dev = [
     "black>=26.3.1",
     "bump-my-version>=1.2.7",
     "click>=8.3.1",
-    "pytest>=9.0.2",
 ]
 
 [tool.bumpversion]

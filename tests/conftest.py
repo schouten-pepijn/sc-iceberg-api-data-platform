@@ -35,7 +35,7 @@ def valid_weather_df() -> pd.DataFrame:
 
 
 @pytest.fixture
-def bronze_weather_df() -> pd.DataFrame:
+def bronze_weather_feed_df() -> pd.DataFrame:
     """Provide Bronze data with duplicates to test deduplication behavior."""
     return pd.DataFrame(
         {

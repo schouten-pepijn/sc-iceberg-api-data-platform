@@ -8,17 +8,17 @@ from catalog.pipeline_state import load_pipeline_state
 from pipelines.validation.ingest_weather import validate
 
 
-def load_bronze_weather() -> pd.DataFrame:
+def load_bronze_weather_feed() -> pd.DataFrame:
     """Load raw Bronze weather rows from Iceberg."""
     catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.bronze_weather")
+    table = catalog.load_table("lakehouse.bronze_weather_feed")
     return table.scan().to_pandas()
 
 
 def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, pd.Timestamp | None]:
     """Build location-scoped hourly Silver aggregates and return watermark metadata."""
     location = _load_location(location_name=location_name)
-    bronze_df = load_bronze_weather()
+    bronze_df = load_bronze_weather_feed()
     validation_result = validate(bronze_df)
 
     if not validation_result["success"]:

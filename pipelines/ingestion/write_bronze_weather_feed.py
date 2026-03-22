@@ -14,7 +14,7 @@ def to_arrow_table(df):
 def append_to_bronze_weather(arrow_table) -> None:
     """Append Arrow rows to the Bronze weather table."""
     catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.bronze_weather")
+    table = catalog.load_table("lakehouse.bronze_weather_feed")
     table.append(arrow_table)
 
 
@@ -23,7 +23,7 @@ def run(location_name: str = "Amsterdam") -> None:
     df = ingest_weather(location_name=location_name)
     arrow_table = to_arrow_table(df)
     append_to_bronze_weather(arrow_table)
-    print(f"Appended {len(df)} records to lakehouse.bronze_weather")
+    print(f"Appended {len(df)} records to lakehouse.bronze_weather_feed")
 
 
 if __name__ == "__main__":

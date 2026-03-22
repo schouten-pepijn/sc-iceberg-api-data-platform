@@ -6,7 +6,7 @@ from pipelines.transformations import transform_weather
 
 
 def test_transform_weather_aggregates_hourly_by_location(
-    monkeypatch, bronze_weather_df
+    monkeypatch, bronze_weather_feed_df
 ) -> None:
     monkeypatch.setattr(
         transform_weather,
@@ -17,7 +17,7 @@ def test_transform_weather_aggregates_hourly_by_location(
         },
     )
     monkeypatch.setattr(
-        transform_weather, "load_bronze_weather", lambda: bronze_weather_df
+        transform_weather, "load_bronze_weather_feed", lambda: bronze_weather_feed_df
     )
     monkeypatch.setattr(
         transform_weather,
@@ -55,7 +55,7 @@ def test_transform_weather_returns_noop_when_watermark_filters_all_rows(
         },
     )
     monkeypatch.setattr(
-        transform_weather, "load_bronze_weather", lambda: valid_weather_df
+        transform_weather, "load_bronze_weather_feed", lambda: valid_weather_df
     )
     monkeypatch.setattr(
         transform_weather,

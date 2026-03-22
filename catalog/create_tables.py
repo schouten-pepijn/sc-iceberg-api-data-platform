@@ -59,7 +59,7 @@ dim_location_schema = Schema(
     NestedField(12, "_batch_id", StringType(), required=False),
 )
 
-state_pipeline_schema = Schema(
+pipeline_state_schema = Schema(
     NestedField(1, "pipeline_name", StringType(), required=False),
     NestedField(2, "location_id", StringType(), required=False),
     NestedField(3, "last_bronze_ingest_ts", TimestamptzType(), required=False),
@@ -85,7 +85,7 @@ def create_table_if_missing(identifier: str, schema: Schema) -> None:
 def run() -> None:
     create_namespace_if_missing()
 
-    create_table_if_missing("lakehouse.state_pipeline", state_pipeline_schema)
+    create_table_if_missing("lakehouse.pipeline_state", pipeline_state_schema)
 
     create_table_if_missing("lakehouse.dim_location", dim_location_schema)
 

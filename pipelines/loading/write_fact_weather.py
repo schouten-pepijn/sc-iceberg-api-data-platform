@@ -3,6 +3,7 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.expressions import EqualTo, Reference
 from pyiceberg.expressions.literals import literal
 
+from catalog.location import load_location as _load_location
 from catalog.pipeline_state import load_pipeline_state, write_pipeline_state
 from pipelines.transformations.transform_fact_weather import (
     run as transform_fact_weather,
@@ -26,23 +27,6 @@ def to_arrow_table(df: object) -> pa.Table:
         ]
     )
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
-
-
-def _load_location(location_name: str = "Amsterdam") -> dict:
-    catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.dim_location")
-    df = table.scan().to_pandas()
-
-    match = df[df["name"] == location_name].sort_values("_ingest_ts").tail(1)
-    if match.empty:
-        raise ValueError(f"No location found with name '{location_name}'")
-
-    row = match.iloc[0]
-    return {
-        "location_id": row["location_id"],
-        "name": row["name"],
-    }
-
 
 def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> None:
     catalog = load_catalog("local")

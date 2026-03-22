@@ -40,9 +40,10 @@ def _load_location(location_name: str = "Amsterdam") -> dict:
     }
 
 
-def overwrite_location_fact_weather(arrow_table, location_id: str) -> None:
+def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> None:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
+    # Replace only the canonical Gold slice for the selected location.
     table.overwrite(
         arrow_table,
         overwrite_filter=EqualTo(

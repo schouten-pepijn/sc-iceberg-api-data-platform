@@ -3,7 +3,7 @@ import uuid
 import pandas as pd
 
 from catalog.location import load_location
-from apis.open_meteo_weather import fetch_weather_data
+from apis.open_meteo_forecast_weather import fetch_weather_data
 
 
 def run(location_name: str = "Amsterdam") -> pd.DataFrame:

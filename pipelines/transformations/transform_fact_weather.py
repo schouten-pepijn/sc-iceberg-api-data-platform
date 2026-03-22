@@ -28,11 +28,40 @@ def load_silver_weather() -> pd.DataFrame:
     return table.scan().to_pandas()
 
 
-def run(location_name: str = "Amsterdam") -> pd.DataFrame:
+def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, date | None]:
     location = _load_location(location_name=location_name)
     silver_df = load_silver_weather().copy()
     silver_df = silver_df[silver_df["location_id"] == location["location_id"]].copy()
     silver_df["day"] = pd.to_datetime(silver_df["day"]).dt.date
+
+    state = load_pipeline_state(
+        pipeline_name="fact_weather",
+        location_id=location["location_id"],
+    )
+    # Gold only needs to rebuild days that were not processed in earlier runs.
+    if state is not None and state["last_silver_processed_day"] is not None:
+        silver_df = silver_df[
+            silver_df["day"] > state["last_silver_processed_day"]
+        ].copy()
+
+    if silver_df.empty:
+        return (
+            pd.DataFrame(
+                columns=[
+                    "location_id",
+                    "day",
+                    "avg_temperature_c",
+                    "avg_temperature_f",
+                    "total_precipitation_mm",
+                    "max_wind_speed_10m",
+                    "hour_count",
+                ]
+            ),
+            None,
+        )
+
+    # Persist the newest processed day as the Gold watermark after a successful write.
+    max_processed_day = silver_df["day"].max()
 
     fact_weather_df = (
         silver_df.groupby(["location_id", "day"], as_index=False)

@@ -7,4 +7,3 @@ def load_dim_location() -> pd.DataFrame:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.dim_location")
     return table.scan().to_pandas()
-

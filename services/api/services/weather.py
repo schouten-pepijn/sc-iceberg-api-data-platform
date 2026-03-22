@@ -7,4 +7,3 @@ def load_fact_weather() -> pd.DataFrame:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
     return table.scan().to_pandas()
-

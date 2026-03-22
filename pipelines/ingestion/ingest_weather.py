@@ -29,7 +29,7 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
     data = fetch_weather_data(lat=location["latitude"], lon=location["longitude"])
 
     batch_id = str(uuid.uuid4())
-    ingest_ts = pd.Timestamp.utcnow()
+    ingest_ts = pd.Timestamp.now("UTC")
 
     df = pd.DataFrame(
         {

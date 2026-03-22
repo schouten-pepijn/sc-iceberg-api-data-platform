@@ -19,7 +19,7 @@ def run(query: str = "Amsterdam") -> pd.DataFrame:
     results = search_locations(query)
 
     batch_id = str(uuid.uuid4())
-    ingest_ts = pd.Timestamp.utcnow()
+    ingest_ts = pd.Timestamp.now("UTC")
 
     rows = []
     for result in results:

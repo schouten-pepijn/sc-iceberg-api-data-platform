@@ -1,3 +1,5 @@
+"""HTTP client for Open-Meteo weather forecast data."""
+
 import httpx
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
@@ -6,6 +8,7 @@ REQUEST_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 
 def _is_retryable_error(exc: BaseException) -> bool:
+    """Return True when an exception should trigger a retry."""
     if isinstance(exc, httpx.RequestError):
         return True
 
@@ -22,6 +25,7 @@ def _is_retryable_error(exc: BaseException) -> bool:
     reraise=True,
 )
 def _fetch_weather_response(lat: float, lon: float) -> httpx.Response:
+    """Fetch the raw weather response for a latitude/longitude pair."""
     response = httpx.get(
         BASE_URL,
         params={
@@ -39,6 +43,7 @@ def fetch_weather_data(
     lat: float = 52.37,
     lon: float = 4.90,
 ):
+    """Fetch and return weather data as a decoded JSON object."""
     response = _fetch_weather_response(lat=lat, lon=lon)
     return response.json()
 

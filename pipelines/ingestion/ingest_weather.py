@@ -1,3 +1,5 @@
+"""Ingest weather observations for a resolved location."""
+
 import uuid
 
 import pandas as pd
@@ -7,6 +9,7 @@ from catalog.location import load_location as _load_location
 
 
 def run(location_name: str = "Amsterdam") -> pd.DataFrame:
+    """Fetch weather data and shape it into the Bronze weather contract."""
     location = _load_location(location_name=location_name)
     data = fetch_weather_data(lat=location["latitude"], lon=location["longitude"])
 
@@ -22,6 +25,7 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
         }
     )
 
+    # Add ingestion metadata used for lineage and incremental watermarking downstream.
     df["location_id"] = location["location_id"]
     df["_ingest_ts"] = ingest_ts
     df["_source_api"] = "open_meteo"

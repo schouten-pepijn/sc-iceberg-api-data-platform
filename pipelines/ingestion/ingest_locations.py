@@ -1,3 +1,5 @@
+"""Ingest location search results into the raw location shape."""
+
 import uuid
 import pandas as pd
 
@@ -5,6 +7,7 @@ from apis.open_meteo_geocoding import search_locations
 
 
 def _build_location_id(row: dict) -> str:
+    """Build a deterministic business key from stable location attributes."""
     return (
         "open_meteo:"
         f"{row.get('name')}:"
@@ -14,8 +17,8 @@ def _build_location_id(row: dict) -> str:
     )
 
 
-# note: append-oriented (not scd)
 def run(query: str = "Amsterdam") -> pd.DataFrame:
+    """Fetch location candidates and normalize them for append-only Bronze ingestion."""
     results = search_locations(query)
 
     batch_id = str(uuid.uuid4())
@@ -33,6 +36,7 @@ def run(query: str = "Amsterdam") -> pd.DataFrame:
             "country": result.get("country"),
             "admin1": result.get("admin1"),
         }
+        # Keep id generation deterministic so repeated fetches map to one entity key.
         row["location_id"] = _build_location_id(row)
         row["_ingest_ts"] = ingest_ts
         row["_source_api"] = "open_meteo_geocoding"

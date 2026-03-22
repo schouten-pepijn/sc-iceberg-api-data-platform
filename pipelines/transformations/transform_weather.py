@@ -1,3 +1,5 @@
+"""Transform Bronze weather rows into hourly Silver aggregates."""
+
 import pandas as pd
 from pyiceberg.catalog import load_catalog
 
@@ -7,12 +9,14 @@ from pipelines.validation.ingest_weather import validate
 
 
 def load_bronze_weather() -> pd.DataFrame:
+    """Load raw Bronze weather rows from Iceberg."""
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.bronze_weather")
     return table.scan().to_pandas()
 
 
 def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, pd.Timestamp | None]:
+    """Build location-scoped hourly Silver aggregates and return watermark metadata."""
     location = _load_location(location_name=location_name)
     bronze_df = load_bronze_weather()
     validation_result = validate(bronze_df)
@@ -21,6 +25,7 @@ def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, pd.Timestamp | 
         raise ValueError(f"Validation failed: {validation_result['errors']}")
 
     df = validation_result["validated_df"].copy()
+    # Silver is location-partitioned in orchestration, so filter early for efficiency.
     df = df[df["location_id"] == location["location_id"]].copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
     df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)

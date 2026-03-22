@@ -1,3 +1,5 @@
+"""Unit tests for Bronze-to-Silver weather transformation behavior."""
+
 import pandas as pd
 
 from pipelines.transformations import transform_weather
@@ -30,6 +32,7 @@ def test_transform_weather_aggregates_hourly_by_location(
 
     silver_df, max_ingest_ts = transform_weather.run("Amsterdam")
 
+    # Duplicate raw points collapse into one hourly aggregate with latest values.
     assert len(silver_df) == 1
     row = silver_df.iloc[0]
     assert row["location_id"] == "loc-amsterdam"
@@ -69,5 +72,6 @@ def test_transform_weather_returns_noop_when_watermark_filters_all_rows(
 
     silver_df, max_ingest_ts = transform_weather.run("Amsterdam")
 
+    # New runs should no-op when watermark excludes all available Bronze rows.
     assert silver_df.empty
     assert max_ingest_ts is None

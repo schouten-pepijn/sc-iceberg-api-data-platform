@@ -1,3 +1,5 @@
+"""FastAPI application exposing curated location and daily weather datasets."""
+
 from datetime import date
 import pandas as pd
 
@@ -18,16 +20,19 @@ app = FastAPI(title="Iceberg API Data Platform")
 
 @app.get("/")
 def read_root():
+    """Redirect root traffic to interactive API docs."""
     return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
 def health():
+    """Return a lightweight liveness signal for probes."""
     return {"status": "ok"}
 
 
 @app.get("/locations", response_model=list[LocationResponse])
 def get_locations(limit: int = Query(default=100, ge=1, le=1000)):
+    """Return latest known dimension record per location."""
     try:
         df = load_dim_location().copy()
     except NoSuchTableError as exc:
@@ -40,6 +45,7 @@ def get_locations(limit: int = Query(default=100, ge=1, le=1000)):
         return []
 
     df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
+    # Dimension rows are append-only; pick the newest row per business key.
     latest_locations = (
         df.sort_values(["location_id", "_ingest_ts"])
         .drop_duplicates(subset=["location_id"], keep="last")
@@ -60,6 +66,7 @@ def get_daily_weather(
     end_date: date | None = None,
     location_id: str | None = None,
 ):
+    """Return Gold daily weather facts with optional date/location filters."""
     if start_date is not None and end_date is not None and start_date > end_date:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -88,6 +95,7 @@ def get_daily_weather(
     if location_id is not None:
         df = df[df["location_id"] == location_id]
 
+    # Keep deterministic ordering for stable API pagination behavior.
     df = df.sort_values(["location_id", "day"]).head(limit)
 
     if df.empty:

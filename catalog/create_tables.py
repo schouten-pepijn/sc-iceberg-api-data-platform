@@ -1,3 +1,5 @@
+"""Bootstrap Iceberg namespace and table contracts for all layers."""
+
 from pyiceberg.catalog import load_catalog
 from pyiceberg.schema import Schema
 from pyiceberg.types import (
@@ -69,12 +71,14 @@ pipeline_state_schema = Schema(
 
 
 def create_namespace_if_missing() -> None:
+    """Create the target namespace once so all tables share one domain."""
     existing_namespaces = set(catalog.list_namespaces())
     if (namespace,) not in existing_namespaces:
         catalog.create_namespace(namespace)
 
 
 def create_table_if_missing(identifier: str, schema: Schema) -> None:
+    """Create a table only when it does not already exist."""
     existing_tables = set(catalog.list_tables(namespace))
     table_name = identifier.split(".")[-1]
     if (namespace, table_name) not in existing_tables:
@@ -83,6 +87,7 @@ def create_table_if_missing(identifier: str, schema: Schema) -> None:
 
 
 def run() -> None:
+    """Create all required Iceberg tables for Bronze, Silver, Gold, and state."""
     create_namespace_if_missing()
 
     create_table_if_missing("lakehouse.pipeline_state", pipeline_state_schema)

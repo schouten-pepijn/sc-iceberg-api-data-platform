@@ -1,3 +1,5 @@
+"""Load transformed Silver hourly data into Iceberg with watermark tracking."""
+
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
 from pyiceberg.expressions import EqualTo, Reference
@@ -9,10 +11,12 @@ from pipelines.transformations.transform_weather import run as transform_weather
 
 
 def _format_metadata_value(value: object) -> str | None:
+    """Normalize metadata values for structured output logs."""
     return None if value is None else str(value)
 
 
 def to_arrow_table(df: object) -> pa.Table:
+    """Convert Silver dataframe rows to the typed Arrow table contract."""
     schema = pa.schema(
         [
             pa.field("location_id", pa.string(), nullable=True),
@@ -26,7 +30,9 @@ def to_arrow_table(df: object) -> pa.Table:
     )
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
 
+
 def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -> None:
+    """Overwrite only one location slice to keep each run idempotent per location."""
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.silver_weather_hourly")
     # Replace only the canonical Silver slice for the selected location.
@@ -39,6 +45,7 @@ def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -
 
 
 def run(location_name: str = "Amsterdam") -> dict[str, object]:
+    """Materialize Silver data for one location and persist new watermark state."""
     location = _load_location(location_name=location_name)
     previous_state = load_pipeline_state(
         pipeline_name="silver_weather_hourly",

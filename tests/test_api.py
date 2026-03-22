@@ -1,4 +1,7 @@
+"""API behavior tests for health, locations, and daily weather endpoints."""
+
 import pandas as pd
+
 
 def test_health_returns_ok(api_client) -> None:
     response = api_client.get("/health")
@@ -41,6 +44,7 @@ def test_locations_returns_latest_record_per_location(monkeypatch, api_client) -
 
     assert response.status_code == 200
     body = response.json()
+    # Expect one row per location id after selecting latest ingested records.
     assert len(body) == 2
     assert {row["location_id"] for row in body} == {"loc-a", "loc-b"}
 
@@ -52,7 +56,9 @@ def test_daily_weather_rejects_invalid_date_range(api_client) -> None:
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "start_date must be less than or equal to end_date"
+    assert (
+        response.json()["detail"] == "start_date must be less than or equal to end_date"
+    )
 
 
 def test_daily_weather_filters_by_location(monkeypatch, api_client) -> None:

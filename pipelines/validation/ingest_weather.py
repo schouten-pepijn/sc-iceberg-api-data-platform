@@ -1,3 +1,5 @@
+"""Validate ingested Bronze weather rows before downstream transforms."""
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera import Check
@@ -31,10 +33,12 @@ WEATHER_SCHEMA = pa.DataFrameSchema(
 
 
 def validate(df: pd.DataFrame):
+    """Validate a weather dataframe and return a structured success/error payload."""
     try:
         validated_df = WEATHER_SCHEMA.validate(df, lazy=True)
         return {"success": True, "errors": [], "validated_df": validated_df}
     except SchemaErrors as exc:
+        # Return compact validation details that can be logged and surfaced in jobs.
         errors = exc.failure_cases[["column", "check", "failure_case"]].to_dict(
             "records"
         )

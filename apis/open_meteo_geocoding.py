@@ -1,3 +1,5 @@
+"""HTTP client for Open-Meteo geocoding search data."""
+
 import httpx
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
@@ -6,6 +8,7 @@ REQUEST_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 
 def _is_retryable_error(exc: BaseException) -> bool:
+    """Return True when an exception should trigger a retry."""
     if isinstance(exc, httpx.RequestError):
         return True
 
@@ -27,6 +30,7 @@ def _search_locations_response(
     language: str,
     country_code: str | None,
 ) -> httpx.Response:
+    """Call the geocoding endpoint and return the raw HTTP response."""
     params = {
         "name": name,
         "count": count,
@@ -48,6 +52,7 @@ def search_locations(
     language: str = "en",
     country_code: str | None = None,
 ):
+    """Search candidate locations and return only the results payload list."""
     response = _search_locations_response(
         name=name,
         count=count,

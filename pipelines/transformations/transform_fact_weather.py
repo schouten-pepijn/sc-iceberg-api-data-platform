@@ -1,3 +1,5 @@
+"""Transform Silver hourly rows into daily Gold fact aggregates."""
+
 from datetime import date
 
 import pandas as pd
@@ -8,12 +10,14 @@ from catalog.pipeline_state import load_pipeline_state
 
 
 def load_silver_weather() -> pd.DataFrame:
+    """Load Silver hourly weather rows from Iceberg."""
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.silver_weather_hourly")
     return table.scan().to_pandas()
 
 
 def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, date | None]:
+    """Build daily fact aggregates and return the latest processed day watermark."""
     location = _load_location(location_name=location_name)
     silver_df = load_silver_weather().copy()
     silver_df = silver_df[silver_df["location_id"] == location["location_id"]].copy()

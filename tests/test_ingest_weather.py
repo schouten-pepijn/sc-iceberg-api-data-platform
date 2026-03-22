@@ -1,6 +1,7 @@
+"""Unit tests for weather ingestion dataframe mapping."""
+
 import uuid
 
-import pandas as pd
 
 from pipelines.ingestion import ingest_weather
 
@@ -47,4 +48,3 @@ def test_ingest_weather_maps_api_payload_to_bronze_dataframe(monkeypatch) -> Non
     assert df["_batch_id"].tolist() == ["batch-123", "batch-123"]
     assert str(df["timestamp"].dtype).startswith("datetime64")
     assert str(df["_ingest_ts"].dtype).startswith("datetime64")
-

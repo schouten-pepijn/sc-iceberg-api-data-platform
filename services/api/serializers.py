@@ -1,3 +1,5 @@
+"""Dataframe-to-response serializers for API payloads."""
+
 from typing import Any, Callable
 
 import pandas as pd
@@ -7,12 +9,14 @@ from services.api.models import LocationResponse
 
 
 def serialize_daily_weather(df: pd.DataFrame) -> list[DailyWeatherResponse]:
+    """Convert a daily weather dataframe into typed API response objects."""
     optional_float: Callable[[Any], float | None] = lambda x: (
         None if pd.isna(x) else float(x)
     )
     optional_int: Callable[[Any], int | None] = lambda x: None if pd.isna(x) else int(x)
 
     normalized_df = df.copy()
+    # Normalize to python date objects to match API schema exactly.
     normalized_df["day"] = pd.to_datetime(normalized_df["day"]).dt.date
 
     return [
@@ -30,6 +34,7 @@ def serialize_daily_weather(df: pd.DataFrame) -> list[DailyWeatherResponse]:
 
 
 def serialize_locations(df: pd.DataFrame) -> list[LocationResponse]:
+    """Convert a location dataframe into typed API response objects."""
     optional_str: Callable[[Any], str | None] = lambda x: None if pd.isna(x) else str(x)
 
     normalized_df = df.copy()

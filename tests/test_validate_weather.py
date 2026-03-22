@@ -1,3 +1,5 @@
+"""Unit tests for ingestion weather validation rules."""
+
 from pipelines.validation.ingest_weather import validate
 
 

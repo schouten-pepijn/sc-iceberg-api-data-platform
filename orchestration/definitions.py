@@ -1,3 +1,5 @@
+"""Dagster Definitions registry for project assets."""
+
 from dagster import Definitions
 
 from orchestration.assets.weather import (

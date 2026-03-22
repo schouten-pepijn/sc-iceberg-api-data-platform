@@ -1,3 +1,5 @@
+"""Pipeline watermark state management stored in Iceberg."""
+
 from datetime import date
 from typing import Any
 
@@ -20,6 +22,7 @@ STATE_SCHEMA = Schema(
 
 
 def _empty_pipeline_state_df() -> pd.DataFrame:
+    """Return an empty state frame with the canonical column contract."""
     return pd.DataFrame(
         columns=[
             "pipeline_name",
@@ -32,6 +35,7 @@ def _empty_pipeline_state_df() -> pd.DataFrame:
 
 
 def _load_pipeline_state_table() -> pd.DataFrame:
+    """Load state history rows, or an empty frame when table is missing."""
     catalog = load_catalog("local")
     try:
         table = catalog.load_table(TABLE_NAME)
@@ -41,6 +45,7 @@ def _load_pipeline_state_table() -> pd.DataFrame:
 
 
 def _load_or_create_pipeline_state_table():
+    """Load the state table, creating it on first run if needed."""
     catalog = load_catalog("local")
     try:
         return catalog.load_table(TABLE_NAME)
@@ -52,6 +57,7 @@ def load_pipeline_state(
     pipeline_name: str,
     location_id: str,
 ) -> dict[str, Any] | None:
+    """Load the latest watermark record for a pipeline/location pair."""
     df = _load_pipeline_state_table()
 
     if df.empty:
@@ -82,6 +88,7 @@ def write_pipeline_state(
     last_bronze_ingest_ts: pd.Timestamp | None = None,
     last_silver_processed_day: date | None = None,
 ) -> None:
+    """Append a new watermark snapshot for incremental processing."""
     table = _load_or_create_pipeline_state_table()
 
     df = pd.DataFrame(

@@ -1,8 +1,12 @@
+"""Pydantic response models for API endpoints."""
+
 from datetime import date
 from pydantic import BaseModel, Field
 
 
 class DailyWeatherResponse(BaseModel):
+    """Serialized Gold weather aggregate returned by the daily endpoint."""
+
     location_id: str = Field(
         description="Identifier for the location of the weather data"
     )
@@ -25,6 +29,8 @@ class DailyWeatherResponse(BaseModel):
 
 
 class LocationResponse(BaseModel):
+    """Serialized latest location record returned by the locations endpoint."""
+
     location_id: str = Field(description="Identifier for the location")
     name: str | None = Field(default=None, description="Location name")
     country_code: str | None = Field(default=None, description="ISO country code")

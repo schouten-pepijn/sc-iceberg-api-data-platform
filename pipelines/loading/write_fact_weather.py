@@ -1,3 +1,5 @@
+"""Load transformed Gold fact data into Iceberg with watermark tracking."""
+
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
 from pyiceberg.expressions import EqualTo, Reference
@@ -11,10 +13,12 @@ from pipelines.transformations.transform_fact_weather import (
 
 
 def _format_metadata_value(value: object) -> str | None:
+    """Normalize metadata values for structured output logs."""
     return None if value is None else str(value)
 
 
 def to_arrow_table(df: object) -> pa.Table:
+    """Convert Gold dataframe rows to the typed Arrow table contract."""
     schema = pa.schema(
         [
             pa.field("location_id", pa.string(), nullable=True),
@@ -28,7 +32,9 @@ def to_arrow_table(df: object) -> pa.Table:
     )
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
 
+
 def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> None:
+    """Overwrite one location slice so Gold refreshes remain idempotent."""
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
     # Replace only the canonical Gold slice for the selected location.
@@ -41,6 +47,7 @@ def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> 
 
 
 def run(location_name: str = "Amsterdam") -> dict[str, object]:
+    """Materialize Gold facts for one location and persist day watermark state."""
     location = _load_location(location_name=location_name)
     previous_state = load_pipeline_state(
         pipeline_name="fact_weather",

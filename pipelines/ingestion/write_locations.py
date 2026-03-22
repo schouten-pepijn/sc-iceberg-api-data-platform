@@ -1,3 +1,5 @@
+"""Persist ingested location data into the dimension table."""
+
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
 
@@ -5,6 +7,7 @@ from pipelines.ingestion.ingest_locations import run as ingest_locations
 
 
 def to_arrow_table(df):
+    """Convert location rows into the typed Arrow schema expected by Iceberg."""
     schema = pa.schema(
         [
             pa.field("location_id", pa.string(), nullable=True),
@@ -25,12 +28,14 @@ def to_arrow_table(df):
 
 
 def append_to_dim_location(arrow_table) -> None:
+    """Append location rows to the dimension table."""
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.dim_location")
     table.append(arrow_table)
 
 
 def run(query: str = "Amsterdam") -> None:
+    """Execute location ingestion and append the result to Iceberg."""
     df = ingest_locations(query=query)
     arrow_table = to_arrow_table(df)
     append_to_dim_location(arrow_table)

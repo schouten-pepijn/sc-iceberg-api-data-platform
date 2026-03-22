@@ -1,3 +1,5 @@
+"""Shared pytest fixtures for API and pipeline tests."""
+
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
@@ -7,11 +9,13 @@ from services.api.main import app
 
 @pytest.fixture
 def api_client() -> TestClient:
+    """Provide a test client for exercising FastAPI routes."""
     return TestClient(app)
 
 
 @pytest.fixture
 def valid_weather_df() -> pd.DataFrame:
+    """Provide a schema-valid Bronze weather sample for validation tests."""
     return pd.DataFrame(
         {
             "timestamp": pd.to_datetime(
@@ -32,6 +36,7 @@ def valid_weather_df() -> pd.DataFrame:
 
 @pytest.fixture
 def bronze_weather_df() -> pd.DataFrame:
+    """Provide Bronze data with duplicates to test deduplication behavior."""
     return pd.DataFrame(
         {
             "timestamp": pd.to_datetime(
@@ -68,4 +73,3 @@ def bronze_weather_df() -> pd.DataFrame:
             "_batch_id": ["batch-123"] * 5,
         }
     )
-

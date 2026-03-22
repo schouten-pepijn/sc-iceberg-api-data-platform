@@ -58,6 +58,16 @@ bronze_forecast_weather_schema = Schema(
     NestedField(9, "_batch_id", StringType(), required=False),
 )
 
+silver_forecast_latest_schema = Schema(
+    NestedField(1, "location_id", StringType(), required=False),
+    NestedField(2, "target_timestamp", TimestamptzType(), required=False),
+    NestedField(3, "forecast_generated_at", TimestamptzType(), required=False),
+    NestedField(4, "temperature", DoubleType(), required=False),
+    NestedField(5, "precipitation", DoubleType(), required=False),
+    NestedField(6, "wind_speed_10m", DoubleType(), required=False),
+    NestedField(7, "day", DateType(), required=False),
+)
+
 dim_location_schema = Schema(
     NestedField(1, "location_id", StringType(), required=False),
     NestedField(2, "name", StringType(), required=False),

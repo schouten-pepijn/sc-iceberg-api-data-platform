@@ -4,13 +4,30 @@ from pyiceberg.catalog import load_catalog
 from pipelines.validation.ingest_weather import validate
 
 
+def _load_location(location_name: str = "Amsterdam") -> dict:
+    catalog = load_catalog("local")
+    table = catalog.load_table("lakehouse.dim_location")
+    df = table.scan().to_pandas()
+
+    match = df[df["name"] == location_name].sort_values("_ingest_ts").tail(1)
+    if match.empty:
+        raise ValueError(f"No location found with name '{location_name}'")
+
+    row = match.iloc[0]
+    return {
+        "location_id": row["location_id"],
+        "name": row["name"],
+    }
+
+
 def load_bronze_weather() -> pd.DataFrame:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.bronze_weather")
     return table.scan().to_pandas()
 
 
-def run() -> pd.DataFrame:
+def run(location_name: str = "Amsterdam") -> pd.DataFrame:
+    location = _load_location(location_name=location_name)
     bronze_df = load_bronze_weather()
     validation_result = validate(bronze_df)
 
@@ -18,6 +35,7 @@ def run() -> pd.DataFrame:
         raise ValueError(f"Validation failed: {validation_result['errors']}")
 
     df = validation_result["validated_df"].copy()
+    df = df[df["location_id"] == location["location_id"]].copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
     df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
 

@@ -15,7 +15,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["black>=26.3.1", "bump-my-version>=1.2.7", "pytest>=9.0.2"]
+dev = [
+    "black>=26.3.1",
+    "bump-my-version>=1.2.7",
+    "click>=8.3.1",
+    "pytest>=9.0.2",
+]
 
 [tool.bumpversion]
 current_version = "0.2.0"

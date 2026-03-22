@@ -2008,6 +2008,7 @@ dependencies = [
 dev = [
     { name = "black" },
     { name = "bump-my-version" },
+    { name = "click" },
     { name = "pytest" },
 ]
 
@@ -2026,6 +2027,7 @@ requires-dist = [
 dev = [
     { name = "black", specifier = ">=26.3.1" },
     { name = "bump-my-version", specifier = ">=1.2.7" },
+    { name = "click", specifier = ">=8.3.1" },
     { name = "pytest", specifier = ">=9.0.2" },
 ]
 

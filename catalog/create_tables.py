@@ -59,6 +59,14 @@ dim_location_schema = Schema(
     NestedField(12, "_batch_id", StringType(), required=False),
 )
 
+state_pipeline_schema = Schema(
+    NestedField(1, "pipeline_name", StringType(), required=False),
+    NestedField(2, "location_id", StringType(), required=False),
+    NestedField(3, "last_bronze_ingest_ts", TimestamptzType(), required=False),
+    NestedField(4, "last_silver_processed_day", DateType(), required=False),
+    NestedField(5, "updated_at", TimestamptzType(), required=False),
+)
+
 
 def create_namespace_if_missing() -> None:
     existing_namespaces = set(catalog.list_namespaces())
@@ -76,6 +84,8 @@ def create_table_if_missing(identifier: str, schema: Schema) -> None:
 
 def run() -> None:
     create_namespace_if_missing()
+
+    create_table_if_missing("lakehouse.state_pipeline", state_pipeline_schema)
 
     create_table_if_missing("lakehouse.dim_location", dim_location_schema)
 

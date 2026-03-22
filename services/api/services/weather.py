@@ -10,3 +10,10 @@ def load_fact_weather() -> pd.DataFrame:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
     return table.scan().to_pandas()
+
+
+def load_fact_forecast_accuracy() -> pd.DataFrame:
+    """Load all rows from the forecast-accuracy fact table."""
+    catalog = load_catalog("local")
+    table = catalog.load_table("lakehouse.fact_forecast_accuracy")
+    return table.scan().to_pandas()

@@ -147,6 +147,9 @@ def run() -> None:
         "lakehouse.silver_weather_feed_hourly", silver_weather_feed_hourly_schema
     )
     create_table_if_missing(
+        "lakehouse.silver_forecast_latest", silver_forecast_latest_schema
+    )
+    create_table_if_missing(
         "lakehouse.silver_observed_weather", silver_observed_weather_schema
     )
     create_table_if_missing("lakehouse.fact_weather", gold_fact_weather_schema)

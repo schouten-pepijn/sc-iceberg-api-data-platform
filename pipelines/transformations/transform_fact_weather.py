@@ -12,7 +12,7 @@ from catalog.pipeline_state import load_pipeline_state
 def load_silver_weather() -> pd.DataFrame:
     """Load Silver hourly weather rows from Iceberg."""
     catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.silver_weather_hourly")
+    table = catalog.load_table("lakehouse.silver_weather_feed_hourly")
     return table.scan().to_pandas()
 
 

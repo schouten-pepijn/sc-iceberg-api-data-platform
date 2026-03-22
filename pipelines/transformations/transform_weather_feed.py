@@ -1,4 +1,4 @@
-"""Transform Bronze weather rows into hourly Silver aggregates."""
+"""Transform Bronze weather feed rows into hourly Silver aggregates."""
 
 import pandas as pd
 from pyiceberg.catalog import load_catalog
@@ -31,7 +31,7 @@ def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, pd.Timestamp | 
     df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
 
     state = load_pipeline_state(
-        pipeline_name="silver_weather_hourly",
+        pipeline_name="silver_weather_feed_hourly",
         location_id=location["location_id"],
     )
     # Only process newly ingested Bronze batches for this location.

@@ -26,7 +26,7 @@ bronze_weather_feed_schema = Schema(
     NestedField(8, "location_id", StringType(), required=False),
 )
 
-silver_weather_hourly_schema = Schema(
+silver_weather_feed_hourly_schema = Schema(
     NestedField(1, "timestamp", TimestamptzType(), required=False),
     NestedField(2, "day", DateType(), required=False),
     NestedField(3, "temperature_c", DoubleType(), required=False),
@@ -121,7 +121,7 @@ def run() -> None:
         "lakehouse.bronze_forecast_weather", bronze_forecast_weather_schema
     )
     create_table_if_missing(
-        "lakehouse.silver_weather_hourly", silver_weather_hourly_schema
+        "lakehouse.silver_weather_feed_hourly", silver_weather_feed_hourly_schema
     )
     create_table_if_missing("lakehouse.fact_weather", gold_fact_weather_schema)
 

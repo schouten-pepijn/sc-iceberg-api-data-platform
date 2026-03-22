@@ -43,12 +43,12 @@ tasks:
   write-bronze-weather:
     desc: Ingest weather data for the default location into Bronze
     cmds:
-      - uv run python pipelines/ingestion/write_bronze_weather.py
+      - uv run python pipelines/ingestion/write_bronze_weather_feed.py
 
   write-silver-weather:
-    desc: Rebuild the Silver hourly weather table
+    desc: Rebuild the Silver hourly weather feed table
     cmds:
-      - uv run python pipelines/transformations/write_silver_weather.py
+      - uv run python pipelines/loading/write_silver_weather_feed.py
 
   write-fact-weather:
     desc: Rebuild the Gold daily weather fact table

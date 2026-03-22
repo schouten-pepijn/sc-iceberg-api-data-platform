@@ -1,4 +1,4 @@
-"""Load transformed Silver hourly data into Iceberg with watermark tracking."""
+"""Load transformed Silver weather feed data into Iceberg with watermark tracking."""
 
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
@@ -7,7 +7,9 @@ from pyiceberg.expressions.literals import literal
 
 from catalog.location import load_location as _load_location
 from catalog.pipeline_state import load_pipeline_state, write_pipeline_state
-from pipelines.transformations.transform_weather import run as transform_weather
+from pipelines.transformations.transform_weather_feed import (
+    run as transform_weather_feed,
+)
 
 
 def _format_metadata_value(value: object) -> str | None:
@@ -34,7 +36,7 @@ def to_arrow_table(df: object) -> pa.Table:
 def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -> None:
     """Overwrite only one location slice to keep each run idempotent per location."""
     catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.silver_weather_hourly")
+    table = catalog.load_table("lakehouse.silver_weather_feed_hourly")
     # Replace only the canonical Silver slice for the selected location.
     table.overwrite(
         arrow_table,
@@ -48,14 +50,14 @@ def run(location_name: str = "Amsterdam") -> dict[str, object]:
     """Materialize Silver data for one location and persist new watermark state."""
     location = _load_location(location_name=location_name)
     previous_state = load_pipeline_state(
-        pipeline_name="silver_weather_hourly",
+        pipeline_name="silver_weather_feed_hourly",
         location_id=location["location_id"],
     )
     previous_watermark = (
         previous_state["last_bronze_ingest_ts"] if previous_state is not None else None
     )
 
-    df, max_ingest_ts = transform_weather(location_name=location_name)
+    df, max_ingest_ts = transform_weather_feed(location_name=location_name)
 
     # A missing watermark advance means there was no new Bronze batch to process.
     if df.empty or max_ingest_ts is None:
@@ -100,7 +102,7 @@ def run(location_name: str = "Amsterdam") -> dict[str, object]:
 
     # Persist the latest processed Bronze ingest timestamp for the next incremental run.
     write_pipeline_state(
-        pipeline_name="silver_weather_hourly",
+        pipeline_name="silver_weather_feed_hourly",
         location_id=location["location_id"],
         last_bronze_ingest_ts=max_ingest_ts,
     )

@@ -122,8 +122,8 @@ def write_pipeline_state(
 
 if __name__ == "__main__":
     write_pipeline_state(
-        pipeline_name="silver_weather_hourly",
+        pipeline_name="silver_weather_feed_hourly",
         location_id="test-location",
         last_bronze_ingest_ts=pd.Timestamp.now(tz="UTC"),
     )
-    print(load_pipeline_state("silver_weather_hourly", "test-location"))
+    print(load_pipeline_state("silver_weather_feed_hourly", "test-location"))

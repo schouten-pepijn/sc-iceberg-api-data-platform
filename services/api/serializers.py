@@ -30,17 +30,18 @@ def serialize_daily_weather(df: pd.DataFrame) -> list[DailyWeatherResponse]:
 
 
 def serialize_locations(df: pd.DataFrame) -> list[LocationResponse]:
+    optional_str: Callable[[Any], str | None] = lambda x: None if pd.isna(x) else str(x)
+
     normalized_df = df.copy()
-    normalized_df = normalized_df.where(normalized_df.notna(), None)
 
     return [
         LocationResponse(
-            location_id=row["location_id"],
-            name=row["name"],
-            country_code=row["country_code"],
-            country=row["country"],
-            admin1=row["admin1"],
-            timezone=row["timezone"],
+            location_id=str(row["location_id"]),
+            name=optional_str(row["name"]),
+            country_code=optional_str(row["country_code"]),
+            country=optional_str(row["country"]),
+            admin1=optional_str(row["admin1"]),
+            timezone=optional_str(row["timezone"]),
         )
         for row in normalized_df.to_dict(orient="records")
     ]

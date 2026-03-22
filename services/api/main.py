@@ -4,27 +4,16 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
 
-from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import NoSuchTableError
 
 from services.api.models import DailyWeatherResponse
 from services.api.models import LocationResponse
 from services.api.serializers import serialize_daily_weather
 from services.api.serializers import serialize_locations
+from services.api.services.locations import load_dim_location
+from services.api.services.weather import load_fact_weather
 
 app = FastAPI(title="Iceberg API Data Platform")
-
-
-def load_fact_weather():
-    catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.fact_weather")
-    return table.scan().to_pandas()
-
-
-def load_dim_location():
-    catalog = load_catalog("local")
-    table = catalog.load_table("lakehouse.dim_location")
-    return table.scan().to_pandas()
 
 
 @app.get("/")

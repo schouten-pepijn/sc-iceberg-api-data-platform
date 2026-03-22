@@ -27,7 +27,7 @@ def load_bronze_weather() -> pd.DataFrame:
     return table.scan().to_pandas()
 
 
-def run(location_name: str = "Amsterdam") -> pd.DataFrame:
+def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, pd.Timestamp | None]:
     location = _load_location(location_name=location_name)
     bronze_df = load_bronze_weather()
     validation_result = validate(bronze_df)
@@ -49,17 +49,22 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
         df = df[df["_ingest_ts"] > state["last_bronze_ingest_ts"]].copy()
 
     if df.empty:
-        return pd.DataFrame(
-            columns=[
-                "location_id",
-                "timestamp",
-                "day",
-                "temperature_c",
-                "temperature_f",
-                "precipitation_mm",
-                "wind_speed_10m_max",
-            ]
+        return (
+            pd.DataFrame(
+                columns=[
+                    "location_id",
+                    "timestamp",
+                    "day",
+                    "temperature_c",
+                    "temperature_f",
+                    "precipitation_mm",
+                    "wind_speed_10m_max",
+                ]
+            ),
+            None,
         )
+
+    max_ingest_ts = df["_ingest_ts"].max()
 
     # Bronze is append-only, so keep the newest record per raw weather timestamp.
     latest_bronze_df = (
@@ -94,10 +99,11 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
         ]
     ].sort_values(["location_id", "timestamp"])
 
-    return silver_df
+    return silver_df, max_ingest_ts
 
 
 if __name__ == "__main__":
-    df = run()
+    df, max_ingest_ts = run()
     print(df.head())
     print(df.dtypes)
+    print(max_ingest_ts)

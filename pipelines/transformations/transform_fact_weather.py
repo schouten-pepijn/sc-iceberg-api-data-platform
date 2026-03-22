@@ -1,5 +1,9 @@
+from datetime import date
+
 import pandas as pd
 from pyiceberg.catalog import load_catalog
+
+from catalog.pipeline_state import load_pipeline_state
 
 
 def _load_location(location_name: str = "Amsterdam") -> dict:

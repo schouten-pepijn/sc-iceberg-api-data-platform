@@ -3,7 +3,7 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.expressions import EqualTo, Reference
 from pyiceberg.expressions.literals import literal
 
-from catalog.pipeline_state import write_pipeline_state
+from catalog.pipeline_state import load_pipeline_state, write_pipeline_state
 from pipelines.transformations.transform_weather import run as transform_weather
 
 
@@ -50,32 +50,48 @@ def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -
     )
 
 
-# This pipeline runs the Bronze to Silver transformation for a single location, and overwrites the entire Silver slice for that location on each run.
-# Watermarking is used to ensure that only new Bronze data is processed on each run, and to avoid unnecessary overwrites of the Silver table when there is no new data.
 def run(location_name: str = "Amsterdam") -> None:
     location = _load_location(location_name=location_name)
+    previous_state = load_pipeline_state(
+        pipeline_name="silver_weather_hourly",
+        location_id=location["location_id"],
+    )
+    previous_watermark = (
+        previous_state["last_bronze_ingest_ts"] if previous_state is not None else None
+    )
+
     df, max_ingest_ts = transform_weather(location_name=location_name)
 
     # A missing watermark advance means there was no new Bronze batch to process.
     if df.empty or max_ingest_ts is None:
         print(
-            f"No new Bronze data for {location_name}; skipped lakehouse.silver_weather_hourly refresh"
+            "Silver refresh skipped: "
+            f"location_name={location_name}, "
+            f"location_id={location['location_id']}, "
+            f"previous_watermark={previous_watermark}, "
+            "new_watermark=None, "
+            "rows_written=0, "
+            "status=no_op"
         )
         return
 
     arrow_table = to_arrow_table(df)
     overwrite_location_silver_weather(arrow_table, location["location_id"])
     print(
-        f"Overwrote {len(df)} records in lakehouse.silver_weather_hourly for {location_name}"
+        "Silver refresh completed: "
+        f"location_name={location_name}, "
+        f"location_id={location['location_id']}, "
+        f"previous_watermark={previous_watermark}, "
+        f"new_watermark={max_ingest_ts}, "
+        f"rows_written={len(df)}, "
+        "status=written"
     )
+
     # Persist the latest processed Bronze ingest timestamp for the next incremental run.
     write_pipeline_state(
         pipeline_name="silver_weather_hourly",
         location_id=location["location_id"],
         last_bronze_ingest_ts=max_ingest_ts,
-    )
-    print(
-        f"Updated pipeline state for lakehouse.silver_weather_hourly with last_bronze_ingest_ts={max_ingest_ts}"
     )
 
 

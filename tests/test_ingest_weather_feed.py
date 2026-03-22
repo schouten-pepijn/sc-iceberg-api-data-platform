@@ -44,7 +44,7 @@ def test_ingest_weather_maps_api_payload_to_bronze_dataframe(monkeypatch) -> Non
         "_batch_id",
     ]
     assert df["location_id"].tolist() == ["loc-amsterdam", "loc-amsterdam"]
-    assert df["_source_api"].tolist() == ["open_meteo", "open_meteo"]
+    assert df["_source_api"].tolist() == ["open_meteo_feed", "open_meteo_feed"]
     assert df["_batch_id"].tolist() == ["batch-123", "batch-123"]
     assert str(df["timestamp"].dtype).startswith("datetime64")
     assert str(df["_ingest_ts"].dtype).startswith("datetime64")

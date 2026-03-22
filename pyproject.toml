@@ -1,6 +1,6 @@
 [project]
 name = "sc-iceberg-api-weather-platform"
-version = "0.2.1"
+version = "0.2.2"
 description = "POC: A data platform showcasing the use of Apache Iceberg for managing weather data ingestion and querying."
 authors = [{ name = "Pepijn Schouten" }]
 readme = "README.md"
@@ -21,7 +21,7 @@ dependencies = [
 dev = ["black>=26.3.1", "bump-my-version>=1.2.7", "click>=8.3.1"]
 
 [tool.bumpversion]
-current_version = "0.2.1"
+current_version = "0.2.2"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"

@@ -15,7 +15,7 @@ catalog = load_catalog("local")
 
 namespace = "lakehouse"
 
-bronze_weather_schema = Schema(
+bronze_weather_feed_schema = Schema(
     NestedField(1, "timestamp", TimestamptzType(), required=False),
     NestedField(2, "temperature", DoubleType(), required=False),
     NestedField(3, "precipitation", DoubleType(), required=False),
@@ -44,6 +44,18 @@ gold_fact_weather_schema = Schema(
     NestedField(5, "max_wind_speed_10m", DoubleType(), required=False),
     NestedField(6, "hour_count", LongType(), required=False),
     NestedField(7, "location_id", StringType(), required=False),
+)
+
+bronze_forecast_weather_schema = Schema(
+    NestedField(1, "location_id", StringType(), required=False),
+    NestedField(2, "target_timestamp", TimestamptzType(), required=False),
+    NestedField(3, "forecast_generated_at", TimestamptzType(), required=False),
+    NestedField(4, "temperature", DoubleType(), required=False),
+    NestedField(5, "precipitation", DoubleType(), required=False),
+    NestedField(6, "wind_speed_10m", DoubleType(), required=False),
+    NestedField(7, "_ingest_ts", TimestamptzType(), required=False),
+    NestedField(8, "_source_api", StringType(), required=False),
+    NestedField(9, "_batch_id", StringType(), required=False),
 )
 
 dim_location_schema = Schema(
@@ -94,7 +106,10 @@ def run() -> None:
 
     create_table_if_missing("lakehouse.dim_location", dim_location_schema)
 
-    create_table_if_missing("lakehouse.bronze_weather", bronze_weather_schema)
+    create_table_if_missing("lakehouse.bronze_weather_feed", bronze_weather_feed_schema)
+    create_table_if_missing(
+        "lakehouse.bronze_forecast_weather", bronze_forecast_weather_schema
+    )
     create_table_if_missing(
         "lakehouse.silver_weather_hourly", silver_weather_hourly_schema
     )

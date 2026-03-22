@@ -75,10 +75,11 @@ def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, date | None]:
         .sort_values(["location_id", "day"])
     )
 
-    return fact_weather_df
+    return fact_weather_df, max_processed_day
 
 
 if __name__ == "__main__":
-    df = run()
+    df, max_processed_day = run()
     print(df.head())
     print(df.dtypes)
+    print(max_processed_day)

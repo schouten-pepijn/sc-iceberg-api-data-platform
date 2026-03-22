@@ -50,13 +50,32 @@ def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -
     )
 
 
+# This pipeline runs the Bronze to Silver transformation for a single location, and overwrites the entire Silver slice for that location on each run.
+# Watermarking is used to ensure that only new Bronze data is processed on each run, and to avoid unnecessary overwrites of the Silver table when there is no new data.
 def run(location_name: str = "Amsterdam") -> None:
     location = _load_location(location_name=location_name)
-    df = transform_weather(location_name=location_name)
+    df, max_ingest_ts = transform_weather(location_name=location_name)
+
+    # A missing watermark advance means there was no new Bronze batch to process.
+    if df.empty or max_ingest_ts is None:
+        print(
+            f"No new Bronze data for {location_name}; skipped lakehouse.silver_weather_hourly refresh"
+        )
+        return
+
     arrow_table = to_arrow_table(df)
     overwrite_location_silver_weather(arrow_table, location["location_id"])
     print(
         f"Overwrote {len(df)} records in lakehouse.silver_weather_hourly for {location_name}"
+    )
+    # Persist the latest processed Bronze ingest timestamp for the next incremental run.
+    write_pipeline_state(
+        pipeline_name="silver_weather_hourly",
+        location_id=location["location_id"],
+        last_bronze_ingest_ts=max_ingest_ts,
+    )
+    print(
+        f"Updated pipeline state for lakehouse.silver_weather_hourly with last_bronze_ingest_ts={max_ingest_ts}"
     )
 
 

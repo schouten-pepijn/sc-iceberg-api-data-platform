@@ -18,6 +18,11 @@ tasks:
     cmds:
       - uv run dagster dev -m orchestration.definitions
 
+  run-tests:
+    desc: Run all unit and integration tests
+    cmds:
+      - uv run pytest tests
+
   reset-catalog:
     desc: Remove the local Iceberg catalog database and warehouse files
     cmds:

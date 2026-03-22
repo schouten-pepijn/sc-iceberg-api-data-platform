@@ -15,7 +15,7 @@ def _resolve_observed_window(
 ) -> tuple[date, date]:
     """Default to yesterday so the observed window is a closed actuals slice."""
     if start_date is None and end_date is None:
-        yesterday = date.today() - timedelta(days=1)
+        yesterday = (pd.Timestamp.now("UTC") - timedelta(days=1)).date()
         return yesterday, yesterday
 
     if start_date is None or end_date is None:

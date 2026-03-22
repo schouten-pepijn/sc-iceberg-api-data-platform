@@ -1,5 +1,8 @@
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
+from pyiceberg.expressions import EqualTo
+from pyiceberg.expressions import Reference
+from pyiceberg.expressions.literals import literal
 
 from pipelines.transformations.transform_fact_weather import (
     run as transform_fact_weather,

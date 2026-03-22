@@ -58,6 +58,17 @@ bronze_forecast_weather_schema = Schema(
     NestedField(9, "_batch_id", StringType(), required=False),
 )
 
+bronze_observed_weather_schema = Schema(
+    NestedField(1, "location_id", StringType(), required=False),
+    NestedField(2, "timestamp", TimestamptzType(), required=False),
+    NestedField(3, "temperature", DoubleType(), required=False),
+    NestedField(4, "precipitation", DoubleType(), required=False),
+    NestedField(5, "wind_speed_10m", DoubleType(), required=False),
+    NestedField(6, "_ingest_ts", TimestamptzType(), required=False),
+    NestedField(7, "_source_api", StringType(), required=False),
+    NestedField(8, "_batch_id", StringType(), required=False),
+)
+
 silver_forecast_latest_schema = Schema(
     NestedField(1, "location_id", StringType(), required=False),
     NestedField(2, "target_timestamp", TimestamptzType(), required=False),
@@ -119,6 +130,9 @@ def run() -> None:
     create_table_if_missing("lakehouse.bronze_weather_feed", bronze_weather_feed_schema)
     create_table_if_missing(
         "lakehouse.bronze_forecast_weather", bronze_forecast_weather_schema
+    )
+    create_table_if_missing(
+        "lakehouse.bronze_observed_weather", bronze_observed_weather_schema
     )
     create_table_if_missing(
         "lakehouse.silver_weather_feed_hourly", silver_weather_feed_hourly_schema

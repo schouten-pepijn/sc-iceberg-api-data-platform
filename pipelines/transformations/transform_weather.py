@@ -5,7 +5,7 @@ from pyiceberg.catalog import load_catalog
 
 from catalog.location import load_location as _load_location
 from catalog.pipeline_state import load_pipeline_state
-from pipelines.validation.ingest_weather import validate
+from pipelines.validation.ingest_weather_feed import validate
 
 
 def load_bronze_weather_feed() -> pd.DataFrame:

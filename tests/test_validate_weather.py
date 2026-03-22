@@ -1,6 +1,6 @@
 """Unit tests for ingestion weather validation rules."""
 
-from pipelines.validation.ingest_weather import validate
+from pipelines.validation.ingest_weather_feed import validate
 
 
 def test_validate_accepts_valid_weather_dataframe(valid_weather_df) -> None:

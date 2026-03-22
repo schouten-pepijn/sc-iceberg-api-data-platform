@@ -28,7 +28,7 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
     # Add ingestion metadata used for lineage and incremental watermarking downstream.
     df["location_id"] = location["location_id"]
     df["_ingest_ts"] = ingest_ts
-    df["_source_api"] = "open_meteo"
+    df["_source_api"] = "open_meteo_feed"
     df["_batch_id"] = batch_id
 
     return df

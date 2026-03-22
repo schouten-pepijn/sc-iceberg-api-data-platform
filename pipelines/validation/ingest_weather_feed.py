@@ -5,7 +5,7 @@ import pandera.pandas as pa
 from pandera import Check
 from pandera.errors import SchemaErrors
 
-WEATHER_SCHEMA = pa.DataFrameSchema(
+WEATHER_FEED_SCHEMA = pa.DataFrameSchema(
     {
         "timestamp": pa.Column(pa.DateTime, nullable=False),
         "temperature": pa.Column(
@@ -35,7 +35,7 @@ WEATHER_SCHEMA = pa.DataFrameSchema(
 def validate(df: pd.DataFrame):
     """Validate a weather dataframe and return a structured success/error payload."""
     try:
-        validated_df = WEATHER_SCHEMA.validate(df, lazy=True)
+        validated_df = WEATHER_FEED_SCHEMA.validate(df, lazy=True)
         return {"success": True, "errors": [], "validated_df": validated_df}
     except SchemaErrors as exc:
         # Return compact validation details that can be logged and surfaced in jobs.
@@ -46,9 +46,9 @@ def validate(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    from pipelines.ingestion.ingest_weather import run as ingest_weather
+    from pipelines.ingestion.ingest_weather_feed import run as ingest_weather_feed
 
-    df = ingest_weather()
+    df = ingest_weather_feed()
     result = validate(df)
 
     print(result["success"])

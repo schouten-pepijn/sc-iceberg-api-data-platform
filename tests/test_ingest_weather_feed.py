@@ -3,12 +3,12 @@
 import uuid
 
 
-from pipelines.ingestion import ingest_weather
+from pipelines.ingestion import ingest_weather_feed
 
 
 def test_ingest_weather_maps_api_payload_to_bronze_dataframe(monkeypatch) -> None:
     monkeypatch.setattr(
-        ingest_weather,
+        ingest_weather_feed,
         "_load_location",
         lambda location_name="Amsterdam": {
             "location_id": "loc-amsterdam",
@@ -18,7 +18,7 @@ def test_ingest_weather_maps_api_payload_to_bronze_dataframe(monkeypatch) -> Non
         },
     )
     monkeypatch.setattr(
-        ingest_weather,
+        ingest_weather_feed,
         "fetch_weather_data",
         lambda lat, lon: {
             "minutely_15": {
@@ -31,7 +31,7 @@ def test_ingest_weather_maps_api_payload_to_bronze_dataframe(monkeypatch) -> Non
     )
     monkeypatch.setattr(uuid, "uuid4", lambda: "batch-123")
 
-    df = ingest_weather.run()
+    df = ingest_weather_feed.run()
 
     assert list(df.columns) == [
         "timestamp",

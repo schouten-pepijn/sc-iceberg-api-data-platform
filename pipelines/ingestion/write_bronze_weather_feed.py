@@ -3,7 +3,7 @@
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
 
-from pipelines.ingestion.ingest_weather import run as ingest_weather
+from pipelines.ingestion.ingest_weather_feed import run as ingest_weather
 
 
 def to_arrow_table(df):

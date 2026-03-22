@@ -34,11 +34,13 @@ def bronze_weather_by_location(context: dg.AssetExecutionContext) -> None:
 def silver_weather_hourly_by_location(context: dg.AssetExecutionContext) -> None:
     location_name = context.partition_key
     context.log.info(f"Transforming weather data into silver for {location_name}...")
-    write_silver_weather(location_name=location_name)
+    result = write_silver_weather(location_name=location_name)
+    context.add_output_metadata(result)
 
 
 @dg.asset(partitions_def=location_partitions, deps=[silver_weather_hourly_by_location])
 def fact_weather_by_location(context: dg.AssetExecutionContext) -> None:
     location_name = context.partition_key
     context.log.info(f"Aggregating weather data into gold for {location_name}...")
-    write_fact_weather(location_name=location_name)
+    result = write_fact_weather(location_name=location_name)
+    context.add_output_metadata(result)

@@ -24,17 +24,39 @@ def to_arrow_table(df):
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
 
 
-def full_load_fact_weather(arrow_table) -> None:
+def _load_location(location_name: str = "Amsterdam") -> dict:
+    catalog = load_catalog("local")
+    table = catalog.load_table("lakehouse.dim_location")
+    df = table.scan().to_pandas()
+
+    match = df[df["name"] == location_name].sort_values("_ingest_ts").tail(1)
+    if match.empty:
+        raise ValueError(f"No location found with name '{location_name}'")
+
+    row = match.iloc[0]
+    return {
+        "location_id": row["location_id"],
+        "name": row["name"],
+    }
+
+
+def overwrite_location_fact_weather(arrow_table, location_id: str) -> None:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_weather")
-    table.overwrite(arrow_table)
+    table.overwrite(
+        arrow_table,
+        overwrite_filter=EqualTo(
+            term=Reference("location_id"), value=literal(location_id)
+        ),
+    )
 
 
-def run() -> None:
-    df = transform_fact_weather()
+def run(location_name: str = "Amsterdam") -> None:
+    location = _load_location(location_name=location_name)
+    df = transform_fact_weather(location_name=location_name)
     arrow_table = to_arrow_table(df)
-    full_load_fact_weather(arrow_table)
-    print(f"Overwrote {len(df)} records in lakehouse.fact_weather")
+    overwrite_location_fact_weather(arrow_table, location["location_id"])
+    print(f"Overwrote {len(df)} records in lakehouse.fact_weather for {location_name}")
 
 
 if __name__ == "__main__":

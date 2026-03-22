@@ -1,16 +1,51 @@
 from datetime import date
 from typing import Any
+
 import pandas as pd
 import pyarrow as pa
 from pyiceberg.catalog import load_catalog
+from pyiceberg.exceptions import NoSuchTableError
+from pyiceberg.schema import Schema
+from pyiceberg.types import DateType, NestedField, StringType, TimestamptzType
 
 TABLE_NAME = "lakehouse.pipeline_state"
+
+STATE_SCHEMA = Schema(
+    NestedField(1, "pipeline_name", StringType(), required=False),
+    NestedField(2, "location_id", StringType(), required=False),
+    NestedField(3, "last_bronze_ingest_ts", TimestamptzType(), required=False),
+    NestedField(4, "last_silver_processed_day", DateType(), required=False),
+    NestedField(5, "updated_at", TimestamptzType(), required=False),
+)
+
+
+def _empty_pipeline_state_df() -> pd.DataFrame:
+    return pd.DataFrame(
+        columns=[
+            "pipeline_name",
+            "location_id",
+            "last_bronze_ingest_ts",
+            "last_silver_processed_day",
+            "updated_at",
+        ]
+    )
 
 
 def _load_pipeline_state_table() -> pd.DataFrame:
     catalog = load_catalog("local")
-    table = catalog.load_table(TABLE_NAME)
-    return table.scan().to_pandas()
+    try:
+        table = catalog.load_table(TABLE_NAME)
+        return table.scan().to_pandas()
+    except NoSuchTableError:
+        return _empty_pipeline_state_df()
+
+
+def _load_or_create_pipeline_state_table():
+    catalog = load_catalog("local")
+    try:
+        return catalog.load_table(TABLE_NAME)
+    except NoSuchTableError:
+        return catalog.create_table(identifier=TABLE_NAME, schema=STATE_SCHEMA)
 
 
 def load_pipeline_state(
@@ -47,8 +82,7 @@ def write_pipeline_state(
     last_bronze_ingest_ts: pd.Timestamp | None = None,
     last_silver_processed_day: date | None = None,
 ) -> None:
-    catalog = load_catalog("local")
-    table = catalog.load_table(TABLE_NAME)
+    table = _load_or_create_pipeline_state_table()
 
     df = pd.DataFrame(
         [

@@ -1,6 +1,13 @@
 version: "3"
 
 tasks:
+  init-dev:
+    cmds:
+      - 'powershell.exe -Command "if (Test-Path .venv) { rm -r .venv }"'
+      - uv venv .venv
+      - 'powershell.exe -Command ".\.venv\Scripts\activate"'
+      - uv sync --group dev
+
   run-api:
     desc: Run the FastAPI application in development mode
     cmds:

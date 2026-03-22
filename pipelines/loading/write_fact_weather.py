@@ -3,7 +3,7 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.expressions import EqualTo, Reference
 from pyiceberg.expressions.literals import literal
 
-from catalog.pipeline_state import write_pipeline_state
+from catalog.pipeline_state import load_pipeline_state, write_pipeline_state
 from pipelines.transformations.transform_fact_weather import (
     run as transform_fact_weather,
 )
@@ -54,26 +54,48 @@ def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> 
 
 def run(location_name: str = "Amsterdam") -> None:
     location = _load_location(location_name=location_name)
+    previous_state = load_pipeline_state(
+        pipeline_name="fact_weather",
+        location_id=location["location_id"],
+    )
+    previous_watermark = (
+        previous_state["last_silver_processed_day"]
+        if previous_state is not None
+        else None
+    )
+
     df, max_processed_day = transform_fact_weather(location_name=location_name)
 
     # A missing day watermark means there was no new Silver data to roll up.
     if df.empty or max_processed_day is None:
         print(
-            f"No new Silver data for {location_name}; skipped lakehouse.fact_weather refresh"
+            "Gold refresh skipped: "
+            f"location_name={location_name}, "
+            f"location_id={location['location_id']}, "
+            f"previous_watermark={previous_watermark}, "
+            "new_watermark=None, "
+            "rows_written=0, "
+            "status=no_op"
         )
         return
 
     arrow_table = to_arrow_table(df)
     overwrite_location_fact_weather(arrow_table, location["location_id"])
-    print(f"Overwrote {len(df)} records in lakehouse.fact_weather for {location_name}")
+    print(
+        "Gold refresh completed: "
+        f"location_name={location_name}, "
+        f"location_id={location['location_id']}, "
+        f"previous_watermark={previous_watermark}, "
+        f"new_watermark={max_processed_day}, "
+        f"rows_written={len(df)}, "
+        "status=written"
+    )
+
     # Persist the latest processed Silver day for the next incremental Gold run.
     write_pipeline_state(
         pipeline_name="fact_weather",
         location_id=location["location_id"],
         last_silver_processed_day=max_processed_day,
-    )
-    print(
-        f"Updated pipeline state for location_id {location['location_id']} with last_silver_processed_day {max_processed_day}"
     )
 
 

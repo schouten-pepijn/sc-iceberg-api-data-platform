@@ -39,3 +39,43 @@ class LocationResponse(BaseModel):
         default=None, description="First-level administrative area"
     )
     timezone: str | None = Field(default=None, description="IANA timezone name")
+
+
+class ForecastAccuracyResponse(BaseModel):
+    """Serialized forecast-vs-observed accuracy row returned by the API."""
+
+    location_id: str = Field(description="Identifier for the location")
+    target_timestamp: str = Field(
+        description="Forecast target timestamp in ISO 8601 UTC format"
+    )
+    day: date = Field(description="Calendar day of the forecast target")
+    forecast_generated_at: str = Field(
+        description="Timestamp when the forecast snapshot was generated"
+    )
+    forecast_temperature: float | None = Field(
+        default=None, description="Forecast temperature in Celsius"
+    )
+    observed_temperature: float | None = Field(
+        default=None, description="Observed temperature in Celsius"
+    )
+    temperature_error: float | None = Field(
+        default=None, description="Forecast minus observed temperature"
+    )
+    forecast_precipitation: float | None = Field(
+        default=None, description="Forecast precipitation in millimeters"
+    )
+    observed_precipitation: float | None = Field(
+        default=None, description="Observed precipitation in millimeters"
+    )
+    precipitation_error: float | None = Field(
+        default=None, description="Forecast minus observed precipitation"
+    )
+    forecast_wind_speed_10m: float | None = Field(
+        default=None, description="Forecast 10 meter wind speed"
+    )
+    observed_wind_speed_10m: float | None = Field(
+        default=None, description="Observed 10 meter wind speed"
+    )
+    wind_speed_error: float | None = Field(
+        default=None, description="Forecast minus observed wind speed"
+    )

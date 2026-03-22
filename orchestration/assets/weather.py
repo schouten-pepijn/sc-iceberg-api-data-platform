@@ -9,6 +9,9 @@ location_partitions = dg.StaticPartitionsDefinition(
     [
         "Amsterdam",
         "Berlin",
+        "Paris",
+        "Madrid",
+        "Rome",
     ]
 )
 

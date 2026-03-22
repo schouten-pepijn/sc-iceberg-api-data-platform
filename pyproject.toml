@@ -1,7 +1,8 @@
 [project]
-name = "sc-iceberg-api-data-platform"
+name = "sc-iceberg-api-weather-platform"
 version = "0.2.1"
-description = "Add your description here"
+description = "POC: A data platform showcasing the use of Apache Iceberg for managing weather data ingestion and querying."
+authors = [{ name = "Pepijn Schouten" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -13,14 +14,11 @@ dependencies = [
     "pandera>=0.30.1",
     "pyiceberg[pyarrow,sql-sqlite]>=0.11.1",
     "pytest>=9.0.2",
+    "tenacity>=9.1.4",
 ]
 
 [dependency-groups]
-dev = [
-    "black>=26.3.1",
-    "bump-my-version>=1.2.7",
-    "click>=8.3.1",
-]
+dev = ["black>=26.3.1", "bump-my-version>=1.2.7", "click>=8.3.1"]
 
 [tool.bumpversion]
 current_version = "0.2.1"

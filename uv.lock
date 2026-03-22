@@ -2003,6 +2003,7 @@ dependencies = [
     { name = "pandera" },
     { name = "pyiceberg", extra = ["pyarrow", "sql-sqlite"] },
     { name = "pytest" },
+    { name = "tenacity" },
 ]
 
 [package.dev-dependencies]
@@ -2022,6 +2023,7 @@ requires-dist = [
     { name = "pandera", specifier = ">=0.30.1" },
     { name = "pyiceberg", extras = ["pyarrow", "sql-sqlite"], specifier = ">=0.11.1" },
     { name = "pytest", specifier = ">=9.0.2" },
+    { name = "tenacity", specifier = ">=9.1.4" },
 ]
 
 [package.metadata.requires-dev]

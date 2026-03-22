@@ -5,6 +5,7 @@ from typing import Any, Callable
 import pandas as pd
 
 from services.api.models import DailyWeatherResponse
+from services.api.models import ForecastAccuracyResponse
 from services.api.models import LocationResponse
 
 
@@ -47,6 +48,41 @@ def serialize_locations(df: pd.DataFrame) -> list[LocationResponse]:
             country=optional_str(row["country"]),
             admin1=optional_str(row["admin1"]),
             timezone=optional_str(row["timezone"]),
+        )
+        for row in normalized_df.to_dict(orient="records")
+    ]
+
+
+def serialize_forecast_accuracy(df: pd.DataFrame) -> list[ForecastAccuracyResponse]:
+    """Convert a forecast-accuracy dataframe into typed API response objects."""
+    optional_float: Callable[[Any], float | None] = lambda x: (
+        None if pd.isna(x) else float(x)
+    )
+
+    normalized_df = df.copy()
+    normalized_df["day"] = pd.to_datetime(normalized_df["day"]).dt.date
+    normalized_df["target_timestamp"] = pd.to_datetime(
+        normalized_df["target_timestamp"], utc=True
+    ).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    normalized_df["forecast_generated_at"] = pd.to_datetime(
+        normalized_df["forecast_generated_at"], utc=True
+    ).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return [
+        ForecastAccuracyResponse(
+            location_id=str(row["location_id"]),
+            target_timestamp=row["target_timestamp"],
+            day=row["day"],
+            forecast_generated_at=row["forecast_generated_at"],
+            forecast_temperature=optional_float(row["forecast_temperature"]),
+            observed_temperature=optional_float(row["observed_temperature"]),
+            temperature_error=optional_float(row["temperature_error"]),
+            forecast_precipitation=optional_float(row["forecast_precipitation"]),
+            observed_precipitation=optional_float(row["observed_precipitation"]),
+            precipitation_error=optional_float(row["precipitation_error"]),
+            forecast_wind_speed_10m=optional_float(row["forecast_wind_speed_10m"]),
+            observed_wind_speed_10m=optional_float(row["observed_wind_speed_10m"]),
+            wind_speed_error=optional_float(row["wind_speed_error"]),
         )
         for row in normalized_df.to_dict(orient="records")
     ]

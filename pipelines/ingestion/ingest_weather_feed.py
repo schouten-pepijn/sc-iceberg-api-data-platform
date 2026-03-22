@@ -5,12 +5,12 @@ import uuid
 import pandas as pd
 
 from apis.open_meteo_weather import fetch_weather_data
-from catalog.location import load_location as _load_location
+from catalog.location import load_location
 
 
 def run(location_name: str = "Amsterdam") -> pd.DataFrame:
     """Fetch weather data and shape it into the Bronze weather contract."""
-    location = _load_location(location_name=location_name)
+    location = load_location(location_name=location_name)
     data = fetch_weather_data(lat=location["latitude"], lon=location["longitude"])
 
     batch_id = str(uuid.uuid4())

@@ -5,7 +5,7 @@ from datetime import date
 import pandas as pd
 from pyiceberg.catalog import load_catalog
 
-from catalog.location import load_location as _load_location
+from catalog.location import load_location
 from catalog.pipeline_state import load_pipeline_state
 
 
@@ -18,7 +18,7 @@ def load_silver_weather() -> pd.DataFrame:
 
 def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, date | None]:
     """Build daily fact aggregates and return the latest processed day watermark."""
-    location = _load_location(location_name=location_name)
+    location = load_location(location_name=location_name)
     silver_df = load_silver_weather().copy()
     silver_df = silver_df[silver_df["location_id"] == location["location_id"]].copy()
     silver_df["day"] = pd.to_datetime(silver_df["day"]).dt.date

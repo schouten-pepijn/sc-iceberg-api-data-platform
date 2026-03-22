@@ -3,7 +3,7 @@
 import pandas as pd
 from pyiceberg.catalog import load_catalog
 
-from catalog.location import load_location as _load_location
+from catalog.location import load_location
 from catalog.pipeline_state import load_pipeline_state
 from pipelines.validation.ingest_weather_feed import validate
 
@@ -17,7 +17,7 @@ def load_bronze_weather_feed() -> pd.DataFrame:
 
 def run(location_name: str = "Amsterdam") -> tuple[pd.DataFrame, pd.Timestamp | None]:
     """Build location-scoped hourly Silver aggregates and return watermark metadata."""
-    location = _load_location(location_name=location_name)
+    location = load_location(location_name=location_name)
     bronze_df = load_bronze_weather_feed()
     validation_result = validate(bronze_df)
 

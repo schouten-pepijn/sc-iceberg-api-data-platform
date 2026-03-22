@@ -5,7 +5,7 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.expressions import EqualTo, Reference
 from pyiceberg.expressions.literals import literal
 
-from catalog.location import load_location as _load_location
+from catalog.location import load_location
 from catalog.pipeline_state import load_pipeline_state, write_pipeline_state
 from pipelines.transformations.transform_weather_feed import (
     run as transform_weather_feed,
@@ -48,7 +48,7 @@ def overwrite_location_silver_weather(arrow_table: pa.Table, location_id: str) -
 
 def run(location_name: str = "Amsterdam") -> dict[str, object]:
     """Materialize Silver data for one location and persist new watermark state."""
-    location = _load_location(location_name=location_name)
+    location = load_location(location_name=location_name)
     previous_state = load_pipeline_state(
         pipeline_name="silver_weather_feed_hourly",
         location_id=location["location_id"],

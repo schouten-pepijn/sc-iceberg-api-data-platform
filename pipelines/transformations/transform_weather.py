@@ -1,6 +1,7 @@
 import pandas as pd
 from pyiceberg.catalog import load_catalog
 
+from catalog.pipeline_state import load_pipeline_state
 from pipelines.validation.ingest_weather import validate
 
 
@@ -39,6 +40,28 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
     df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
     df["_ingest_ts"] = pd.to_datetime(df["_ingest_ts"], utc=True)
 
+    state = load_pipeline_state(
+        pipeline_name="silver_weather_hourly",
+        location_id=location["location_id"],
+    )
+    # Only process newly ingested Bronze batches for this location.
+    if state is not None and state["last_bronze_ingest_ts"] is not None:
+        df = df[df["_ingest_ts"] > state["last_bronze_ingest_ts"]].copy()
+
+    if df.empty:
+        return pd.DataFrame(
+            columns=[
+                "location_id",
+                "timestamp",
+                "day",
+                "temperature_c",
+                "temperature_f",
+                "precipitation_mm",
+                "wind_speed_10m_max",
+            ]
+        )
+
+    # Bronze is append-only, so keep the newest record per raw weather timestamp.
     latest_bronze_df = (
         df.sort_values(["location_id", "timestamp", "_ingest_ts"])
         .drop_duplicates(subset=["location_id", "timestamp"], keep="last")

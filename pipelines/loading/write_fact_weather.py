@@ -9,6 +9,10 @@ from pipelines.transformations.transform_fact_weather import (
 )
 
 
+def _format_metadata_value(value: object) -> str | None:
+    return None if value is None else str(value)
+
+
 def to_arrow_table(df: object) -> pa.Table:
     schema = pa.schema(
         [
@@ -52,7 +56,7 @@ def overwrite_location_fact_weather(arrow_table: pa.Table, location_id: str) -> 
     )
 
 
-def run(location_name: str = "Amsterdam") -> None:
+def run(location_name: str = "Amsterdam") -> dict[str, object]:
     location = _load_location(location_name=location_name)
     previous_state = load_pipeline_state(
         pipeline_name="fact_weather",
@@ -68,6 +72,14 @@ def run(location_name: str = "Amsterdam") -> None:
 
     # A missing day watermark means there was no new Silver data to roll up.
     if df.empty or max_processed_day is None:
+        result = {
+            "location_name": location_name,
+            "location_id": location["location_id"],
+            "previous_watermark": _format_metadata_value(previous_watermark),
+            "new_watermark": None,
+            "rows_written": 0,
+            "status": "no_op",
+        }
         print(
             "Gold refresh skipped: "
             f"location_name={location_name}, "
@@ -77,10 +89,18 @@ def run(location_name: str = "Amsterdam") -> None:
             "rows_written=0, "
             "status=no_op"
         )
-        return
+        return result
 
     arrow_table = to_arrow_table(df)
     overwrite_location_fact_weather(arrow_table, location["location_id"])
+    result = {
+        "location_name": location_name,
+        "location_id": location["location_id"],
+        "previous_watermark": _format_metadata_value(previous_watermark),
+        "new_watermark": _format_metadata_value(max_processed_day),
+        "rows_written": len(df),
+        "status": "written",
+    }
     print(
         "Gold refresh completed: "
         f"location_name={location_name}, "
@@ -97,6 +117,7 @@ def run(location_name: str = "Amsterdam") -> None:
         location_id=location["location_id"],
         last_silver_processed_day=max_processed_day,
     )
+    return result
 
 
 if __name__ == "__main__":

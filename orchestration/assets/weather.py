@@ -2,8 +2,8 @@ import dagster as dg
 
 from pipelines.ingestion.write_bronze_weather import run as write_bronze_weather
 from pipelines.ingestion.write_locations import run as write_locations
-from pipelines.transformations.write_fact_weather import run as write_fact_weather
-from pipelines.transformations.write_silver_weather import run as write_silver_weather
+from pipelines.loading.write_fact_weather import run as write_fact_weather
+from pipelines.loading.write_silver_weather import run as write_silver_weather
 
 location_partitions = dg.StaticPartitionsDefinition(
     [

@@ -124,3 +124,34 @@ def test_forecast_accuracy_filters_by_location(monkeypatch, api_client) -> None:
     assert len(body) == 1
     assert body[0]["location_id"] == "loc-b"
     assert body[0]["target_timestamp"] == "2026-03-22T10:00:00Z"
+
+
+
+def test_forecast_accuracy_daily_filters_by_location(monkeypatch, api_client) -> None:
+    from services.api import main
+
+    monkeypatch.setattr(
+        main,
+        "load_fact_forecast_accuracy_daily",
+        lambda: pd.DataFrame(
+            {
+                "location_id": ["loc-a", "loc-b"],
+                "day": pd.to_datetime(["2026-03-22", "2026-03-22"]),
+                "mean_absolute_temperature_error": [1.2, 0.8],
+                "mean_absolute_precipitation_error": [0.3, 0.1],
+                "mean_absolute_wind_speed_error": [1.5, 0.9],
+                "avg_forecast_horizon_hours": [12.0, 18.0],
+                "row_count": [24, 24],
+            }
+        ),
+    )
+
+    response = api_client.get(
+        "/forecast/accuracy/daily", params={"location_id": "loc-b"}
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["location_id"] == "loc-b"
+    assert body[0]["avg_forecast_horizon_hours"] == 18.0

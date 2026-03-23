@@ -87,6 +87,7 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
                 "forecast_wind_speed_10m",
                 "observed_wind_speed_10m",
                 "wind_speed_error",
+                "forecast_horizon_hours",
             ]
         )
 
@@ -100,6 +101,9 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
     fact_df["wind_speed_error"] = (
         fact_df["wind_speed_10m_forecast"] - fact_df["wind_speed_10m_observed"]
     )
+    fact_df["forecast_horizon_hours"] = (
+        fact_df["target_timestamp"] - fact_df["forecast_generated_at"]
+    ).dt.total_seconds() / 3600
 
     fact_df = fact_df.rename(
         columns={
@@ -127,6 +131,7 @@ def run(location_name: str = "Amsterdam") -> pd.DataFrame:
             "forecast_wind_speed_10m",
             "observed_wind_speed_10m",
             "wind_speed_error",
+            "forecast_horizon_hours",
         ]
     ].sort_values(["location_id", "target_timestamp", "forecast_generated_at"])
 

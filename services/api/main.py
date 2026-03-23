@@ -10,12 +10,18 @@ from pyiceberg.exceptions import NoSuchTableError
 
 from services.api.models import DailyWeatherResponse
 from services.api.models import ForecastAccuracyResponse
+from services.api.models import ForecastAccuracyDailyResponse
 from services.api.models import LocationResponse
 from services.api.serializers import serialize_daily_weather
 from services.api.serializers import serialize_forecast_accuracy
+from services.api.serializers import serialize_forecast_accuracy_daily
 from services.api.serializers import serialize_locations
 from services.api.services.locations import load_dim_location
-from services.api.services.weather import load_fact_forecast_accuracy, load_fact_weather
+from services.api.services.weather import (
+    load_fact_forecast_accuracy,
+    load_fact_forecast_accuracy_daily,
+    load_fact_weather,
+)
 
 app = FastAPI(title="Iceberg API Data Platform")
 
@@ -151,3 +157,51 @@ def get_forecast_accuracy(
         return []
 
     return serialize_forecast_accuracy(df)
+
+
+
+@app.get(
+    "/forecast/accuracy/daily",
+    response_model=list[ForecastAccuracyDailyResponse],
+)
+def get_forecast_accuracy_daily(
+    limit: int = Query(default=100, ge=1, le=1000),
+    start_date: date | None = None,
+    end_date: date | None = None,
+    location_id: str | None = None,
+):
+    """Return daily forecast-accuracy aggregates with optional date/location filters."""
+    if start_date is not None and end_date is not None and start_date > end_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_date must be less than or equal to end_date",
+        )
+
+    try:
+        df = load_fact_forecast_accuracy_daily().copy()
+    except NoSuchTableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="fact_forecast_accuracy_daily table does not exist. Materialize the daily accuracy fact first.",
+        ) from exc
+
+    if df.empty:
+        return []
+
+    df["day"] = pd.to_datetime(df["day"]).dt.date
+
+    if start_date is not None:
+        df = df[df["day"] >= start_date]
+
+    if end_date is not None:
+        df = df[df["day"] <= end_date]
+
+    if location_id is not None:
+        df = df[df["location_id"] == location_id]
+
+    df = df.sort_values(["location_id", "day"]).head(limit)
+
+    if df.empty:
+        return []
+
+    return serialize_forecast_accuracy_daily(df)

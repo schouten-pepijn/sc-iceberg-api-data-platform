@@ -105,6 +105,17 @@ fact_forecast_accuracy_schema = Schema(
     NestedField(14, "wind_speed_error", DoubleType(), required=False),
 )
 
+fact_forecast_accuracy_daily_schema = Schema(
+    NestedField(1, "location_id", StringType(), required=False),
+    NestedField(2, "day", DateType(), required=False),
+    NestedField(3, "mean_absolute_temperature_error", DoubleType(), required=False),
+    NestedField(4, "mean_absolute_precipitation_error", DoubleType(), required=False),
+    NestedField(5, "mean_absolute_wind_speed_error", DoubleType(), required=False),
+    NestedField(6, "avg_forecast_horizon_hours", DoubleType(), required=False),
+    NestedField(7, "row_count", LongType(), required=False),
+)
+
+
 dim_location_schema = Schema(
     NestedField(1, "location_id", StringType(), required=False),
     NestedField(2, "name", StringType(), required=False),
@@ -171,6 +182,9 @@ def run() -> None:
     )
     create_table_if_missing(
         "lakehouse.fact_forecast_accuracy", fact_forecast_accuracy_schema
+    )
+    create_table_if_missing(
+        "lakehouse.fact_forecast_accuracy_daily", fact_forecast_accuracy_daily_schema
     )
     create_table_if_missing("lakehouse.fact_weather", gold_fact_weather_schema)
 

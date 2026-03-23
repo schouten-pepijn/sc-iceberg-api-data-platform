@@ -18,7 +18,9 @@ def to_arrow_table(df: object) -> pa.Table:
             pa.field("location_id", pa.string(), nullable=True),
             pa.field("target_timestamp", pa.timestamp("us", tz="UTC"), nullable=True),
             pa.field("day", pa.date32(), nullable=True),
-            pa.field("forecast_generated_at", pa.timestamp("us", tz="UTC"), nullable=True),
+            pa.field(
+                "forecast_generated_at", pa.timestamp("us", tz="UTC"), nullable=True
+            ),
             pa.field("forecast_temperature", pa.float64(), nullable=True),
             pa.field("observed_temperature", pa.float64(), nullable=True),
             pa.field("temperature_error", pa.float64(), nullable=True),
@@ -28,6 +30,7 @@ def to_arrow_table(df: object) -> pa.Table:
             pa.field("forecast_wind_speed_10m", pa.float64(), nullable=True),
             pa.field("observed_wind_speed_10m", pa.float64(), nullable=True),
             pa.field("wind_speed_error", pa.float64(), nullable=True),
+            pa.field("forecast_horizon_hours", pa.float64(), nullable=True),
         ]
     )
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)

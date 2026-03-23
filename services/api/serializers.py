@@ -6,6 +6,7 @@ import pandas as pd
 
 from services.api.models import DailyWeatherResponse
 from services.api.models import ForecastAccuracyResponse
+from services.api.models import ForecastAccuracyDailyResponse
 from services.api.models import LocationResponse
 
 
@@ -83,6 +84,41 @@ def serialize_forecast_accuracy(df: pd.DataFrame) -> list[ForecastAccuracyRespon
             forecast_wind_speed_10m=optional_float(row["forecast_wind_speed_10m"]),
             observed_wind_speed_10m=optional_float(row["observed_wind_speed_10m"]),
             wind_speed_error=optional_float(row["wind_speed_error"]),
+        )
+        for row in normalized_df.to_dict(orient="records")
+    ]
+
+
+
+def serialize_forecast_accuracy_daily(
+    df: pd.DataFrame,
+) -> list[ForecastAccuracyDailyResponse]:
+    """Convert a daily forecast-accuracy dataframe into typed API response objects."""
+    optional_float: Callable[[Any], float | None] = lambda x: (
+        None if pd.isna(x) else float(x)
+    )
+    optional_int: Callable[[Any], int | None] = lambda x: None if pd.isna(x) else int(x)
+
+    normalized_df = df.copy()
+    normalized_df["day"] = pd.to_datetime(normalized_df["day"]).dt.date
+
+    return [
+        ForecastAccuracyDailyResponse(
+            location_id=str(row["location_id"]),
+            day=row["day"],
+            mean_absolute_temperature_error=optional_float(
+                row["mean_absolute_temperature_error"]
+            ),
+            mean_absolute_precipitation_error=optional_float(
+                row["mean_absolute_precipitation_error"]
+            ),
+            mean_absolute_wind_speed_error=optional_float(
+                row["mean_absolute_wind_speed_error"]
+            ),
+            avg_forecast_horizon_hours=optional_float(
+                row["avg_forecast_horizon_hours"]
+            ),
+            row_count=optional_int(row["row_count"]),
         )
         for row in normalized_df.to_dict(orient="records")
     ]

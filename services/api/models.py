@@ -79,3 +79,26 @@ class ForecastAccuracyResponse(BaseModel):
     wind_speed_error: float | None = Field(
         default=None, description="Forecast minus observed wind speed"
     )
+
+
+
+class ForecastAccuracyDailyResponse(BaseModel):
+    """Serialized daily forecast-accuracy aggregate returned by the API."""
+
+    location_id: str = Field(description="Identifier for the location")
+    day: date = Field(description="Calendar day of the forecast targets")
+    mean_absolute_temperature_error: float | None = Field(
+        default=None, description="Mean absolute temperature forecast error"
+    )
+    mean_absolute_precipitation_error: float | None = Field(
+        default=None, description="Mean absolute precipitation forecast error"
+    )
+    mean_absolute_wind_speed_error: float | None = Field(
+        default=None, description="Mean absolute wind-speed forecast error"
+    )
+    avg_forecast_horizon_hours: float | None = Field(
+        default=None, description="Average forecast horizon in hours"
+    )
+    row_count: int | None = Field(
+        default=None, description="Number of accuracy rows contributing to the day"
+    )

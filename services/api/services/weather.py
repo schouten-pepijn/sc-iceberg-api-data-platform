@@ -17,3 +17,11 @@ def load_fact_forecast_accuracy() -> pd.DataFrame:
     catalog = load_catalog("local")
     table = catalog.load_table("lakehouse.fact_forecast_accuracy")
     return table.scan().to_pandas()
+
+
+
+def load_fact_forecast_accuracy_daily() -> pd.DataFrame:
+    """Load all rows from the daily forecast-accuracy fact table."""
+    catalog = load_catalog("local")
+    table = catalog.load_table("lakehouse.fact_forecast_accuracy_daily")
+    return table.scan().to_pandas()

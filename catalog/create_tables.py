@@ -88,6 +88,25 @@ silver_forecast_latest_schema = Schema(
     NestedField(7, "day", DateType(), required=False),
 )
 
+
+silver_forecast_revisions_schema = Schema(
+    NestedField(1, "location_id", StringType(), required=False),
+    NestedField(2, "target_timestamp", TimestamptzType(), required=False),
+    NestedField(3, "forecast_generated_at", TimestamptzType(), required=False),
+    NestedField(4, "revision_number", LongType(), required=False),
+    NestedField(5, "previous_forecast_generated_at", TimestamptzType(), required=False),
+    NestedField(6, "temperature", DoubleType(), required=False),
+    NestedField(7, "previous_temperature", DoubleType(), required=False),
+    NestedField(8, "temperature_delta_from_previous", DoubleType(), required=False),
+    NestedField(9, "precipitation", DoubleType(), required=False),
+    NestedField(10, "previous_precipitation", DoubleType(), required=False),
+    NestedField(11, "precipitation_delta_from_previous", DoubleType(), required=False),
+    NestedField(12, "wind_speed_10m", DoubleType(), required=False),
+    NestedField(13, "previous_wind_speed_10m", DoubleType(), required=False),
+    NestedField(14, "wind_speed_delta_from_previous", DoubleType(), required=False),
+    NestedField(15, "day", DateType(), required=False),
+)
+
 fact_forecast_accuracy_schema = Schema(
     NestedField(1, "location_id", StringType(), required=False),
     NestedField(2, "target_timestamp", TimestamptzType(), required=False),
@@ -176,6 +195,9 @@ def run() -> None:
     )
     create_table_if_missing(
         "lakehouse.silver_forecast_latest", silver_forecast_latest_schema
+    )
+    create_table_if_missing(
+        "lakehouse.silver_forecast_revisions", silver_forecast_revisions_schema
     )
     create_table_if_missing(
         "lakehouse.silver_observed_weather", silver_observed_weather_schema
